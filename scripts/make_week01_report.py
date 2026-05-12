@@ -1,9 +1,72 @@
-# Week 1 Report ? PokerAI Baseline Environment and Tournament
+from pathlib import Path
+from datetime import datetime
+import subprocess
+import pandas as pd
+import numpy as np
 
-**Date:** 2026-05-12 23:40  
-**Git commit:** `bfb6f1d`  
+csv_path = Path("results/tables/exp01_baseline_tournament.csv")
+report_path = Path("reports/weekly/week01.md")
+report_path.parent.mkdir(parents=True, exist_ok=True)
+
+if not csv_path.exists():
+    raise FileNotFoundError(f"Could not find {csv_path}. Run exp01_baseline_tournament.py first.")
+
+df = pd.read_csv(csv_path)
+
+def get_git_commit():
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            text=True
+        ).strip()
+    except Exception:
+        return "not-recorded"
+
+def ci_from_seed_means(values):
+    values = np.asarray(values, dtype=float)
+    n = len(values)
+    mean = values.mean()
+    if n <= 1:
+        return mean, np.nan, np.nan
+    se = values.std(ddof=1) / np.sqrt(n)
+    return mean, mean - 1.96 * se, mean + 1.96 * se
+
+summary_rows = []
+for (game, agent_a, agent_b), g in df.groupby(["game", "agent_a", "agent_b"]):
+    mean, ci_low, ci_high = ci_from_seed_means(g["mean_payoff_to_a"])
+    summary_rows.append({
+        "Game": game,
+        "Agent A": agent_a,
+        "Agent B": agent_b,
+        "Seeds": ",".join(map(str, sorted(g["seed"].unique()))),
+        "N per seed": int(g["n_duplicate_pairs"].iloc[0]),
+        "Mean payoff to A": round(mean, 4),
+        "95% CI low": round(ci_low, 4) if not np.isnan(ci_low) else "",
+        "95% CI high": round(ci_high, 4) if not np.isnan(ci_high) else "",
+        "Avg win rate A": round(g["win_rate_a"].mean(), 4),
+    })
+
+summary = pd.DataFrame(summary_rows).sort_values("Mean payoff to A", ascending=False)
+
+best = summary.iloc[0]
+worst = summary.iloc[-1]
+
+markdown_table = summary.to_markdown(index=False)
+
+n_rows = len(df)
+seeds = sorted(df["seed"].unique())
+games = sorted(df["game"].unique())
+agents = sorted(set(df["agent_a"]).union(set(df["agent_b"])))
+n_pairs = sorted(df["n_duplicate_pairs"].unique())
+git_commit = get_git_commit()
+date = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+report = f"""# Week 1 Report ? PokerAI Baseline Environment and Tournament
+
+**Date:** {date}  
+**Git commit:** `{git_commit}`  
 **Experiment:** `exp01_baseline_tournament.py`  
-**Game:** `kuhn_poker`  
+**Game:** `{", ".join(games)}`  
 
 ## 1. Objective
 
@@ -41,12 +104,12 @@ The experiment was a round-robin tournament among the five baseline agents on Ku
 
 **Configuration:**
 
-- Number of result rows: `50`
-- Seeds used: `[np.int64(0), np.int64(1), np.int64(2), np.int64(3), np.int64(4)]`
-- Duplicate pairs per seed: `[np.int64(10000)]`
-- Agents: `always_call, always_fold, ev_heuristic, random, rule_based`
+- Number of result rows: `{n_rows}`
+- Seeds used: `{seeds}`
+- Duplicate pairs per seed: `{n_pairs}`
+- Agents: `{", ".join(agents)}`
 
-A seed fixes the random number generator used for card deals and stochastic decisions. Running seeds `[np.int64(0), np.int64(1), np.int64(2), np.int64(3), np.int64(4)]` gives multiple independent repetitions of the same experiment, reducing dependence on a single lucky or unlucky run.
+A seed fixes the random number generator used for card deals and stochastic decisions. Running seeds `{seeds}` gives multiple independent repetitions of the same experiment, reducing dependence on a single lucky or unlucky run.
 
 The main metric is **mean payoff to Agent A**.
 
@@ -56,28 +119,17 @@ The main metric is **mean payoff to Agent A**.
 
 ## 5. Results
 
-| Game       | Agent A     | Agent B      | Seeds     |   N per seed |   Mean payoff to A |   95% CI low |   95% CI high |   Avg win rate A |
-|:-----------|:------------|:-------------|:----------|-------------:|-------------------:|-------------:|--------------:|-----------------:|
-| kuhn_poker | always_call | always_fold  | 0,1,2,3,4 |        10000 |             1      |       1      |        1      |           1      |
-| kuhn_poker | random      | always_fold  | 0,1,2,3,4 |        10000 |             0.501  |       0.4963 |        0.5058 |           0.501  |
-| kuhn_poker | rule_based  | ev_heuristic | 0,1,2,3,4 |        10000 |             0.0764 |       0.0742 |        0.0786 |           0.1528 |
-| kuhn_poker | always_call | rule_based   | 0,1,2,3,4 |        10000 |             0.0035 |      -0.0007 |        0.0076 |           0.3356 |
-| kuhn_poker | always_fold | rule_based   | 0,1,2,3,4 |        10000 |             0      |       0      |        0      |           0      |
-| kuhn_poker | random      | rule_based   | 0,1,2,3,4 |        10000 |            -0.0401 |      -0.0445 |       -0.0357 |           0.169  |
-| kuhn_poker | always_fold | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1167 |      -0.119  |       -0.1143 |           0      |
-| kuhn_poker | always_call | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1522 |      -0.1557 |       -0.1488 |           0.1804 |
-| kuhn_poker | random      | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1614 |      -0.1656 |       -0.1571 |           0.1255 |
-| kuhn_poker | random      | always_call  | 0,1,2,3,4 |        10000 |            -0.382  |      -0.3936 |       -0.3705 |           0.2485 |
+{markdown_table}
 
 ## 6. Main Observations
 
 The strongest observed matchup for Agent A was:
 
-> **always_call vs always_fold**, with mean payoff to A = **1.0**.
+> **{best["Agent A"]} vs {best["Agent B"]}**, with mean payoff to A = **{best["Mean payoff to A"]}**.
 
 The weakest observed matchup for Agent A was:
 
-> **random vs always_call**, with mean payoff to A = **-0.382**.
+> **{worst["Agent A"]} vs {worst["Agent B"]}**, with mean payoff to A = **{worst["Mean payoff to A"]}**.
 
 The results behave as expected for sanity-check baselines. Degenerate strategies such as always folding are exploitable, while more active strategies can gain consistently against them. This confirms that the tournament loop, payoff recording, duplicate pairing, and CSV logging are functioning.
 
@@ -114,3 +166,9 @@ Week 1 is complete at the infrastructure level:
 - Multi-seed tournament results generated.
 - Weekly report generated.
 
+"""
+
+report_path.write_text(report, encoding="utf-8")
+print(f"Wrote report to {report_path}")
+print("\nPreview:\n")
+print(report[:2000])

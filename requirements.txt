@@ -8,3 +8,4 @@ scipy
 pytest
 jupyter
 ipykernel
+tabulate
