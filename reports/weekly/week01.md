@@ -1,116 +1,154 @@
-# Week 1 Report ? PokerAI Baseline Environment and Tournament
+# Week 1 Report — Baseline Poker Bots on Kuhn Poker
 
-**Date:** 2026-05-15 11:27  
-**Git commit:** `3589f6f`  
+**Date generated:** 2026-05-15 13:51  
+**Git commit:** `873ec24`  
 **Experiment:** `exp01_baseline_tournament.py`  
 **Game:** `kuhn_poker`  
 
 ## 1. Objective
 
-The objective of Week 1 was to set up a reproducible research environment for the poker bot project and establish baseline performance on Kuhn Poker. This week focused on infrastructure, simple baseline agents, and a first round-robin evaluation pipeline.
+The objective of Week 1 was to build a working experimental pipeline for the PokerAI summer project before moving to regret minimization. Instead of starting directly with CFR/MCCFR, this week focused on three foundations:
 
-The larger project goal is to move from simple bots to regret-minimization methods such as CFR, CFR+, and MCCFR. Therefore, Week 1 intentionally starts with simple agents so that later solver-based agents can be compared against clear lower baselines.
+1. loading Kuhn Poker from OpenSpiel,
+2. implementing simple baseline agents,
+3. evaluating those agents through a reproducible tournament.
 
-## 2. Environment Setup
+This gives us a sanity-checked environment where future CFR, CFR+, and MCCFR agents can be compared against clear lower baselines.
 
-The repository was initialized and pushed to GitHub. A Python virtual environment was created on Windows, dependencies were installed, and OpenSpiel was verified through the baseline tournament.
+## 2. What Was Achieved
 
-The project currently contains:
+By the end of Week 1, the project had the following working components:
 
-- baseline agents under `poker_ai/agents/`
-- tournament/evaluation logic under `poker_ai/evaluation/`
-- experiment scripts under `experiments/`
-- result CSVs under `results/tables/`
-- weekly reports under `reports/weekly/`
+- a Windows-compatible Python virtual environment,
+- an OpenSpiel `kuhn_poker` setup,
+- five baseline agents: `random`, `always_call`, `always_fold`, `rule_based`, and `ev_heuristic`,
+- a duplicate-pair tournament evaluator,
+- CSV result logging under `results/tables/`,
+- a one-hand OpenSpiel observer script for explaining state transitions,
+- Git/GitHub version control for code, reports, and slides.
 
-## 3. Agents Implemented
+The main technical achievement is that the project now has a complete loop:
 
-The following five baseline agents were included in the Week 1 tournament:
+```text
+OpenSpiel game -> bot action -> state transition -> payoff -> result table
+```
 
-1. **Random Agent** ? chooses uniformly among legal actions.
-2. **Always-Call Agent** ? calls/checks when possible.
-3. **Always-Fold Agent** ? folds when possible.
-4. **Rule-Based Agent** ? simple hand-coded heuristic.
-5. **EV-Heuristic Agent** ? simple expected-value-inspired heuristic.
+## 3. Experimental Setup
 
-These agents are intentionally weak/simple. Their purpose is not to solve poker, but to define reference points before moving to regret matching and CFR.
+The Week 1 tournament was a round-robin among the five baseline agents. With five agents, there are:
 
-## 4. Experimental Design
+```text
+5 choose 2 = 10 pairwise matchups
+```
 
-The experiment was a round-robin tournament among the five baseline agents on Kuhn Poker.
+For each matchup, the evaluator used duplicate-pair evaluation. In one duplicate pair, the same card-deal seed is used twice:
 
-**Configuration:**
+1. Agent A plays as Player 0 and Agent B plays as Player 1.
+2. The seats are swapped: Agent B plays as Player 0 and Agent A plays as Player 1.
 
-- Number of result rows: `50`
-- Seeds used: `[np.int64(0), np.int64(1), np.int64(2), np.int64(3), np.int64(4)]`
-- Duplicate pairs per seed: `[np.int64(10000)]`
-- Agents: `always_call, always_fold, ev_heuristic, random, rule_based`
+The payoff to Agent A is then averaged across the two hands. This reduces card-luck and seat-position variance.
 
-A seed fixes the random number generator used for card deals and stochastic decisions. Running seeds `[np.int64(0), np.int64(1), np.int64(2), np.int64(3), np.int64(4)]` gives multiple independent repetitions of the same experiment, reducing dependence on a single lucky or unlucky run.
+**Run metadata**
 
-The main metric is **mean payoff to Agent A**.
+- Result rows in raw tournament file: `50`
+- Experimental seeds: `[0, 1, 2, 3, 4]`
+- Duplicate pairs per matchup per seed: `[10000]`
+- Actual hands per matchup per seed: `2 × n_duplicate_pairs`
 
-- Positive value: Agent A beats Agent B on average.
-- Negative value: Agent A loses to Agent B on average.
-- Near zero: roughly even matchup.
+## 4. Main Metric
+
+The headline metric is:
+
+```text
+mean_payoff_to_a
+```
+
+This is the average chip payoff to Agent A. It is better than win rate because poker hands can have different payoff sizes. A bot can win many small pots and still lose money overall if it loses larger pots.
+
+Interpretation:
+
+- positive mean payoff: Agent A beats Agent B on average,
+- negative mean payoff: Agent A loses to Agent B on average,
+- near zero: roughly even under this evaluation.
 
 ## 5. Results
 
-| Game       | Agent A     | Agent B      | Seeds     |   N per seed |   Mean payoff to A |   95% CI low |   95% CI high |   Avg win rate A |
-|:-----------|:------------|:-------------|:----------|-------------:|-------------------:|-------------:|--------------:|-----------------:|
-| kuhn_poker | always_call | always_fold  | 0,1,2,3,4 |        10000 |             1      |       1      |        1      |           1      |
-| kuhn_poker | random      | always_fold  | 0,1,2,3,4 |        10000 |             0.501  |       0.4963 |        0.5058 |           0.501  |
-| kuhn_poker | always_fold | rule_based   | 0,1,2,3,4 |        10000 |             0      |       0      |        0      |           0      |
-| kuhn_poker | rule_based  | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.0896 |      -0.091  |       -0.0882 |           0      |
-| kuhn_poker | always_fold | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1167 |      -0.119  |       -0.1143 |           0      |
-| kuhn_poker | always_call | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1522 |      -0.1557 |       -0.1488 |           0.1804 |
-| kuhn_poker | random      | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1614 |      -0.1656 |       -0.1571 |           0.1255 |
-| kuhn_poker | random      | rule_based   | 0,1,2,3,4 |        10000 |            -0.2111 |      -0.2138 |       -0.2084 |           0.0612 |
-| kuhn_poker | always_call | rule_based   | 0,1,2,3,4 |        10000 |            -0.334  |      -0.3358 |       -0.3321 |           0      |
-| kuhn_poker | random      | always_call  | 0,1,2,3,4 |        10000 |            -0.382  |      -0.3936 |       -0.3705 |           0.2485 |
+| Agent A     | Agent B      |   Mean payoff to A |   CI low |   CI high |   Win rate A |
+|:------------|:-------------|-------------------:|---------:|----------:|-------------:|
+| always_call | always_fold  |             1      |   1      |    1      |       1      |
+| random      | always_fold  |             0.501  |   0.4912 |    0.5108 |       0.501  |
+| always_fold | rule_based   |             0      |   0      |    0      |       0      |
+| rule_based  | ev_heuristic |            -0.0896 |  -0.0934 |   -0.0859 |       0      |
+| always_fold | ev_heuristic |            -0.1167 |  -0.123  |   -0.1104 |       0      |
+| always_call | ev_heuristic |            -0.1522 |  -0.1634 |   -0.1411 |       0.1804 |
+| random      | ev_heuristic |            -0.1614 |  -0.1714 |   -0.1514 |       0.1255 |
+| random      | rule_based   |            -0.2111 |  -0.2171 |   -0.2052 |       0.0612 |
+| always_call | rule_based   |            -0.334  |  -0.3386 |   -0.3293 |       0      |
+| random      | always_call  |            -0.382  |  -0.3974 |   -0.3667 |       0.2485 |
 
-## 6. Main Observations
+## 6. Key Observations
 
-The strongest observed matchup for Agent A was:
+### 6.1 Strongest and weakest rows
 
-> **always_call vs always_fold**, with mean payoff to A = **1.0**.
+The strongest Agent-A result was:
 
-The weakest observed matchup for Agent A was:
+```text
+always_call vs always_fold: mean payoff to A = 1.0000
+```
 
-> **random vs always_call**, with mean payoff to A = **-0.382**.
+The weakest Agent-A result was:
 
-The results behave as expected for sanity-check baselines. Degenerate strategies such as always folding are exploitable, while more active strategies can gain consistently against them. This confirms that the tournament loop, payoff recording, duplicate pairing, and CSV logging are functioning.
+```text
+random vs always_call: mean payoff to A = -0.3820
+```
 
-## 7. Issues Encountered and Fixes
+### 6.2 Degenerate strategies behave as expected
 
-Several setup issues were resolved:
+`always_call` strongly beats `always_fold` with mean payoff `1.0000`. This is expected because an always-folding/passive strategy gives up too much value.
 
-1. The ZIP archive had already been extracted, so PowerShell refused to overwrite existing files.
-2. GitHub CLI was not installed initially, so the repository was pushed after setting up Git/GitHub access.
-3. Python could not initially import `poker_ai`, which was fixed by configuring the project package through `pyproject.toml`.
-4. The baseline tournament was successfully executed after the editable package setup was fixed.
+`random` also beats `always_fold` with mean payoff `0.5010`, confirming that an active strategy can exploit an overly passive one.
 
-## 8. Next Week Plan
+### 6.3 Rule-based bot improved after adding domain logic
 
-Week 2 will move from fixed baseline agents to regret minimization.
+The updated rule-based bot uses card strength and whether it is facing a bet:
 
-Planned tasks:
+- King: bet/call,
+- Queen: check/pass if no bet is pending, call if facing a bet,
+- Jack: check/fold.
 
-1. Implement regret matching from scratch on Rock-Paper-Scissors.
-2. Track average strategy convergence toward the Nash equilibrium.
-3. Plot regret decay over iterations.
-4. Write a short explanation connecting regret matching to CFR.
+This is why `always_call` now loses to `rule_based` with mean payoff to always-call of `-0.3340`. The rule-based bot avoids some bad calls and punishes over-aggressive play.
 
-This is the conceptual bridge from simple poker bots to Counterfactual Regret Minimization.
+### 6.4 EV heuristic remains the strongest simple baseline
 
-## 9. Current Status
+The row `rule_based vs ev_heuristic` has mean payoff `-0.0896`. Since this is negative, the rule-based bot loses to the EV-inspired heuristic. This is consistent with the intended ladder: the EV heuristic is supposed to be stronger than simple hand-coded rules, but still weaker than future CFR-style agents.
 
-Week 1 is complete at the infrastructure level:
+### 6.5 Why `always_fold vs rule_based` can be exactly zero
 
-- GitHub repo created and pushed.
-- Python environment working.
-- OpenSpiel-based Kuhn Poker tournament working.
-- Five baseline agents implemented.
-- Multi-seed tournament results generated.
-- Weekly report generated.
+The row `always_fold vs rule_based` is `0.0000`. This can happen because results are reported after duplicate-pair averaging. Individual hands can be won or lost, but after swapping seats on the same deal, the payoff may cancel exactly for this simple matchup.
 
+## 7. Current Interpretation
+
+The Week 1 results are qualitatively sensible:
+
+- random play is weak but not completely inactive,
+- always-fold is exploitable,
+- always-call is exploitable by more selective strategies,
+- rule-based play improves after adding basic poker logic,
+- EV-inspired play is the strongest simple Week 1 baseline.
+
+This means the evaluation pipeline is working and can now support more serious algorithms.
+
+## 8. Next Week
+
+Week 2 will move from fixed baseline agents to regret minimization. The next tasks are:
+
+1. implement regret matching on Rock-Paper-Scissors,
+2. track average strategy convergence,
+3. plot average regret over time,
+4. connect regret matching to Counterfactual Regret Minimization.
+
+This prepares the project for vanilla CFR on Kuhn Poker in Week 3.
+
+## 9. Final Week 1 Status
+
+Week 1 is complete. The repo now has a working OpenSpiel environment, baseline bots, reproducible tournament evaluation, generated result tables, explanatory logs, reports, and presentation material.
