@@ -4,7 +4,7 @@ import re
 
 from poker_ai.agents.base import Agent
 
-
+#Domain Knowledge agent 
 def _private_card_from_info_state(info_state: str) -> int | None:
     """Extract the first integer visible in the information state.
 
