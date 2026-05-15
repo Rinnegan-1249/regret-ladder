@@ -1,7 +1,7 @@
 # Week 1 Report ? PokerAI Baseline Environment and Tournament
 
-**Date:** 2026-05-12 23:40  
-**Git commit:** `bfb6f1d`  
+**Date:** 2026-05-15 11:27  
+**Git commit:** `3589f6f`  
 **Experiment:** `exp01_baseline_tournament.py`  
 **Game:** `kuhn_poker`  
 
@@ -60,13 +60,13 @@ The main metric is **mean payoff to Agent A**.
 |:-----------|:------------|:-------------|:----------|-------------:|-------------------:|-------------:|--------------:|-----------------:|
 | kuhn_poker | always_call | always_fold  | 0,1,2,3,4 |        10000 |             1      |       1      |        1      |           1      |
 | kuhn_poker | random      | always_fold  | 0,1,2,3,4 |        10000 |             0.501  |       0.4963 |        0.5058 |           0.501  |
-| kuhn_poker | rule_based  | ev_heuristic | 0,1,2,3,4 |        10000 |             0.0764 |       0.0742 |        0.0786 |           0.1528 |
-| kuhn_poker | always_call | rule_based   | 0,1,2,3,4 |        10000 |             0.0035 |      -0.0007 |        0.0076 |           0.3356 |
 | kuhn_poker | always_fold | rule_based   | 0,1,2,3,4 |        10000 |             0      |       0      |        0      |           0      |
-| kuhn_poker | random      | rule_based   | 0,1,2,3,4 |        10000 |            -0.0401 |      -0.0445 |       -0.0357 |           0.169  |
+| kuhn_poker | rule_based  | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.0896 |      -0.091  |       -0.0882 |           0      |
 | kuhn_poker | always_fold | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1167 |      -0.119  |       -0.1143 |           0      |
 | kuhn_poker | always_call | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1522 |      -0.1557 |       -0.1488 |           0.1804 |
 | kuhn_poker | random      | ev_heuristic | 0,1,2,3,4 |        10000 |            -0.1614 |      -0.1656 |       -0.1571 |           0.1255 |
+| kuhn_poker | random      | rule_based   | 0,1,2,3,4 |        10000 |            -0.2111 |      -0.2138 |       -0.2084 |           0.0612 |
+| kuhn_poker | always_call | rule_based   | 0,1,2,3,4 |        10000 |            -0.334  |      -0.3358 |       -0.3321 |           0      |
 | kuhn_poker | random      | always_call  | 0,1,2,3,4 |        10000 |            -0.382  |      -0.3936 |       -0.3705 |           0.2485 |
 
 ## 6. Main Observations

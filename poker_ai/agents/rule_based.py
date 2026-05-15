@@ -6,23 +6,43 @@ from poker_ai.agents.base import Agent
 
 
 def _private_card_from_info_state(info_state: str) -> int | None:
-    """Best-effort parser for Kuhn/Leduc information state strings.
+    """Extract the first integer visible in the information state.
 
-    OpenSpiel information-state strings differ slightly by game/version. For Week 1,
-    this simple parser is enough for a heuristic baseline: it extracts the first integer
-    visible in the information state, which is usually the player's private card.
+    In Kuhn Poker, this is the player's private card:
+    0 = Jack, 1 = Queen, 2 = King.
     """
     match = re.search(r"\d+", info_state)
     return int(match.group(0)) if match else None
+
+
+def _public_action_history(info_state: str) -> str:
+    """Remove the private card digits and keep only public action letters.
+
+    Examples:
+    '1'   -> ''
+    '0p'  -> 'p'
+    '1pb' -> 'pb'
+    """
+    return re.sub(r"\d+", "", info_state)
+
+
+def _facing_bet(info_state: str) -> bool:
+    """Returns True if the player is currently responding to a bet.
+
+    In Kuhn Poker, if the public action history ends with 'b',
+    the current player is facing an outstanding bet.
+    """
+    public_history = _public_action_history(info_state)
+    return public_history.endswith("b")
 
 
 class RuleBasedAgent(Agent):
     """Tiny tight-aggressive baseline.
 
     Heuristic:
-    - With a high private card, choose aggressive/call action if legal.
-    - With a low private card, choose passive/fold action if legal.
-    - With middle cards, lean passive unless already facing action.
+    - With King, bet/call aggressively.
+    - With Jack, check/fold passively.
+    - With Queen, check/pass if no one has bet, but call if facing a bet.
 
     This is deliberately simple. Its job is to create a non-random baseline that CFR
     should later beat.
@@ -42,8 +62,15 @@ class RuleBasedAgent(Agent):
         if card is None:
             return passive
 
-        # Kuhn cards are usually 0,1,2. Leduc has a slightly larger action space,
-        # but this still gives a reasonable baseline.
+        facing_bet = _facing_bet(info)
+
         if card >= 2:
             return aggressive
+
+        if card <= 0:
+            return passive
+
+        if card == 1:
+            return aggressive if facing_bet else passive
+
         return passive
