@@ -1,6 +1,6 @@
-# PokerAI Summer Project
+# Poker Project
 
-Research-grade poker AI experiments built around OpenSpiel, beginning with simple baseline agents on Kuhn Poker and progressing toward regret-minimization methods such as Regret Matching, Vanilla CFR, CFR+, and Monte Carlo CFR.
+This project is built around OpenSpiel, beginning with simple baseline agents on Kuhn Poker and progressing toward regret-minimization methods such as Regret Matching, Vanilla CFR, CFR+, and Monte Carlo CFR.
 
 The central goal is not to jump directly to full Texas Hold'em. The project is intentionally narrow and deep: build a clean, reproducible pipeline on small imperfect-information poker games, validate each step, and only then scale from Kuhn Poker to Leduc Poker.
 
