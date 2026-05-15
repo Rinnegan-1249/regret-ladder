@@ -1,8 +1,5 @@
 """Observer script for one OpenSpiel poker hand.
 
-This script is intentionally verbose. It prints the OpenSpiel game/state functions
-used by the Week 1 tournament code, so you can explain to a professor what is
-happening inside one hand between two baseline bots.
 
 Example:
     python scripts/observe_openspiel_game.py --game kuhn_poker --agent-a random --agent-b always_call --seed 0
