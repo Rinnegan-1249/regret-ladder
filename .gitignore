@@ -17,3 +17,4 @@ __pycache__/
 # Experiment logs
 results/logs/
 
+poker_ai.egg-info/

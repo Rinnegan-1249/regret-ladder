@@ -74,6 +74,8 @@ def round_robin(
                 agent_b=agent_b,
                 n_pairs=n_pairs,
                 base_seed=int(seed) * 1_000_000,
+                # Each experiment seed gets a large non-overlapping block of deal seeds.
+                # This stays safe as long as n_pairs < 1_000_000.
             )
             s = summarize_payoffs(payoffs)
             rows.append(
