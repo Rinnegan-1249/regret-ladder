@@ -8,3 +8,13 @@ results/checkpoints/*
 .DS_Store
 .vscode/
 .idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Experiment logs
+results/logs/
+
+poker_ai.egg-info/

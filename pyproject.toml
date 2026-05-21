@@ -1,9 +1,21 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "poker-ai"
 version = "0.1.0"
-description = "Research-grade poker bot project using OpenSpiel"
-requires-python = ">=3.11"
+description = "Research-grade poker AI summer project"
+requires-python = ">=3.11,<3.13"
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]
+[tool.setuptools.packages.find]
+include = ["poker_ai*"]
+exclude = [
+    "experiments*",
+    "configs*",
+    "reports*",
+    "results*",
+    "slides*",
+    "notebooks*",
+    "tests*"
+]
