@@ -1,6 +1,6 @@
 // Shared helpers: tabs, fetch wrappers, SSE consumption.
 
-function initTabs(container) {
+function initTabs(container, onActivate) {
   const tabs = container.querySelectorAll(".tabs button");
   const panes = container.querySelectorAll(".tabpane");
   tabs.forEach((btn) => {
@@ -8,7 +8,16 @@ function initTabs(container) {
       tabs.forEach((b) => b.classList.remove("active"));
       panes.forEach((p) => p.classList.remove("active"));
       btn.classList.add("active");
-      container.querySelector(`#${btn.dataset.pane}`).classList.add("active");
+      const pane = container.querySelector(`#${btn.dataset.pane}`);
+      pane.classList.add("active");
+      // Plotly charts rendered while a pane was display:none have zero
+      // width; resize them now that the pane is visible.
+      if (window.Plotly) {
+        pane.querySelectorAll(".chart, .chart-sm").forEach((div) => {
+          if (div._fullLayout) Plotly.Plots.resize(div);
+        });
+      }
+      if (onActivate) onActivate(btn.dataset.pane, pane);
     });
   });
 }

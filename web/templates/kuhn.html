@@ -2,16 +2,19 @@
 {% block title %}Kuhn Poker — Regret Ladder{% endblock %}
 {% block content %}
 
-<h1>Kuhn Poker</h1>
-<p class="subtitle">The smallest real poker game — private cards, betting, and bluffing in equilibrium.
-Play it, watch four CFR-family algorithms train, read the theory.</p>
+<div class="hero" style="padding-top:1.6rem">
+  <div class="tagline">RUNGS 03–04 — EXTENSIVE-FORM GAMES</div>
+  <h1>Kuhn <span class="accent">Poker</span></h1>
+  <p class="subtitle">The smallest real poker game — private cards, betting, and bluffing in equilibrium.
+  Play it, watch four CFR-family algorithms train, read the theory.</p>
+</div>
 
 <div id="kuhn-tabs">
 <div class="tabs">
-  <button class="active" data-pane="pane-game">The game</button>
-  <button data-pane="pane-kplay">Play</button>
-  <button data-pane="pane-ktrain">Live training</button>
-  <button data-pane="pane-ktheory">Theory</button>
+  <button class="active" data-pane="pane-game">01 / The game</button>
+  <button data-pane="pane-kplay">02 / Play</button>
+  <button data-pane="pane-ktrain">03 / Live training</button>
+  <button data-pane="pane-ktheory">04 / Theory</button>
 </div>
 
 <!-- ============================== GAME ============================== -->
@@ -21,7 +24,7 @@ Play it, watch four CFR-family algorithms train, read the theory.</p>
     Kuhn Poker (Kuhn 1950) uses a three-card deck: <strong>Jack &lt; Queen &lt; King</strong>. Both
     players ante 1 chip; each is dealt one private card. A single betting round follows with bet size 1:
   </p>
-  <div class="figure">
+  <div class="figure dark">
     <img src="/static/img/kuhn_tree.svg" alt="Kuhn poker betting tree" style="max-width:740px">
     <figcaption>The full betting tree after the deal. "p" = pass/check/fold, "b" = bet/call.</figcaption>
   </div>
@@ -89,21 +92,49 @@ Play it, watch four CFR-family algorithms train, read the theory.</p>
       <div><div class="score" id="k-handno">0 / 0</div><div class="who">hands</div></div>
     </div>
 
-    <div id="k-table" class="card" style="display:none">
-      <div style="font-family:system-ui,sans-serif">
-        <div>Your card: <strong id="k-card" style="font-size:1.3rem"></strong>
-          <span style="color:var(--muted)">(seat <span id="k-seat"></span>)</span></div>
-        <div>Betting so far: <code id="k-betting"></code></div>
+    <div id="k-table" class="poker-table" style="display:none">
+      <div class="table-row">
+        <div>
+          <div class="pcard-wrap">
+            <div class="pcard" id="k-opp-card">
+              <div class="face back"></div>
+              <div class="face front"><span class="idx tl" id="k-opp-idx-tl"></span>
+                <span class="rank" id="k-opp-rank"></span>
+                <span class="idx br" id="k-opp-idx-br"></span></div>
+            </div>
+          </div>
+          <div class="card-label" id="k-opp-label">Opponent</div>
+        </div>
+        <div class="pot">
+          <div class="chips" id="k-pot">2</div>
+          <div class="lbl">pot (chips)</div>
+          <div class="bet-chips" id="k-betchips"></div>
+        </div>
+        <div>
+          <div class="pcard-wrap">
+            <div class="pcard faceup" id="k-your-card">
+              <div class="face back"></div>
+              <div class="face front"><span class="idx tl" id="k-your-idx-tl"></span>
+                <span class="rank" id="k-your-rank"></span>
+                <span class="idx br" id="k-your-idx-br"></span></div>
+            </div>
+          </div>
+          <div class="card-label">You — seat <span id="k-seat"></span></div>
+        </div>
       </div>
-      <div id="k-actions" style="margin-top:0.7rem"></div>
+      <div class="hand-banner" id="k-banner"></div>
+      <div class="poker-actions" id="k-actions"></div>
     </div>
 
-    <div id="k-result" class="note" style="display:none"></div>
-    <div id="k-auto-result" class="card" style="display:none; font-family:system-ui,sans-serif"></div>
+    <div id="k-auto-result" class="card" style="display:none">
+      <div class="statgrid" id="k-auto-stats"></div>
+    </div>
+
+    <div id="k-bankroll-chart" class="chart-sm" style="display:none"></div>
 
     <h3>Hand log</h3>
     <div class="log">
-      <table class="tbl" id="k-log">
+      <table class="tbl" id="k-log" style="width:100%">
         <thead><tr><th>#</th><th>Betting</th><th>Outcome</th><th>Cards</th><th>P1 payoff</th></tr></thead>
         <tbody></tbody>
       </table>

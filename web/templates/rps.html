@@ -2,15 +2,18 @@
 {% block title %}Rock–Paper–Scissors — Regret Ladder{% endblock %}
 {% block content %}
 
-<h1>Rock–Paper–Scissors</h1>
-<p class="subtitle">Regret matching on the canonical zero-sum normal-form game — play it, watch it train,
-read the theory.</p>
+<div class="hero" style="padding-top:1.6rem">
+  <div class="tagline">RUNG 02 — NORMAL-FORM GAMES</div>
+  <h1>Rock–Paper–<span class="accent">Scissors</span></h1>
+  <p class="subtitle">Regret matching on the canonical zero-sum game — duel the bots, watch the
+  algorithm train live, read the theory.</p>
+</div>
 
 <div id="rps-tabs">
 <div class="tabs">
-  <button class="active" data-pane="pane-play">Play</button>
-  <button data-pane="pane-train">Live training</button>
-  <button data-pane="pane-theory">Theory &amp; results</button>
+  <button class="active" data-pane="pane-play">01 / Play</button>
+  <button data-pane="pane-train">02 / Live training</button>
+  <button data-pane="pane-theory">03 / Theory &amp; results</button>
 </div>
 
 <!-- ============================== PLAY ============================== -->
@@ -34,8 +37,8 @@ read the theory.</p>
     </div>
     <div class="field">Player 2
       <select id="p2-kind">
-        <option value="rm_frozen">RM bot — frozen avg strategy (10&#8308; iters)</option>
         <option value="rm_adaptive">RM bot — adaptive (Hart &amp; Mas-Colell 2000)</option>
+        <option value="rm_frozen">RM bot — frozen avg strategy (10&#8308; iters)</option>
         <option value="human">Human (pick each round)</option>
         <option value="distribution">Human (fixed distribution)</option>
       </select>
@@ -51,9 +54,9 @@ read the theory.</p>
     <button class="primary" id="rps-start">Start match</button>
   </div>
   <div class="note">
-    Moves are committed server-side and revealed only after both players have acted — your choice is
-    never visible to the bot before the reveal, and vice versa. The <em>adaptive</em> bot updates its
-    regrets after each reveal using only your realized action (see Theory).
+    Moves are committed server-side and revealed only after both players have acted. The
+    <em>adaptive</em> bot updates its regrets after each reveal using only your realized action —
+    over-play one move and watch it punish you (see Theory for the Hart &amp; Mas-Colell guarantee).
   </div>
 
   <div id="rps-game" style="display:none">
@@ -61,26 +64,45 @@ read the theory.</p>
       <div><div class="score" id="rps-score1">0</div><div class="who" id="rps-who1">Player 1</div></div>
       <div><div class="score" id="rps-score2">0</div><div class="who" id="rps-who2">Player 2</div></div>
       <div><div class="score" id="rps-roundno">0 / 0</div><div class="who">rounds</div></div>
+      <div><div class="score streak" id="rps-streak"></div><div class="who">streak</div></div>
     </div>
-    <div id="rps-actions" style="display:none; margin:0.8rem 0">
-      <span style="font-family:system-ui,sans-serif; font-size:0.9rem; color:var(--muted)" id="rps-prompt"></span><br>
-      <button class="action" data-a="0">&#9994; Rock</button>
-      <button class="action" data-a="1">&#9995; Paper</button>
-      <button class="action" data-a="2">&#9996;&#65039; Scissors</button>
+
+    <div class="duel" id="rps-duel">
+      <div style="text-align:center">
+        <div class="fist" id="rps-fist1">&#9994;</div>
+        <div class="card-label" id="rps-duel-who1">P1</div>
+      </div>
+      <div class="vs">VS</div>
+      <div style="text-align:center">
+        <div class="fist" id="rps-fist2">&#9994;</div>
+        <div class="card-label" id="rps-duel-who2">P2</div>
+      </div>
     </div>
-    <button class="primary" id="rps-autorun" style="display:none">Run all rounds</button>
+    <div class="verdict" id="rps-verdict"></div>
+
+    <div id="rps-actions" style="display:none; text-align:center">
+      <div class="card-label" id="rps-prompt" style="margin-bottom:0.5rem"></div>
+      <div class="rps-hands" style="justify-content:center">
+        <button class="hand" data-a="0" title="Rock">&#9994;</button>
+        <button class="hand" data-a="1" title="Paper">&#9995;</button>
+        <button class="hand" data-a="2" title="Scissors">&#9996;&#65039;</button>
+      </div>
+    </div>
+    <div style="text-align:center"><button class="primary" id="rps-autorun" style="display:none">Run all rounds</button></div>
     <div class="status" id="rps-status"></div>
 
+    <div class="history-strip" id="rps-history"></div>
+
     <div id="rps-adaptive-view" style="display:none">
-      <h3>Adaptive bot's current strategy</h3>
-      <div id="rps-adaptive-bars" class="bars"></div>
+      <h3>Adaptive bot's current strategy <span class="secnum" style="font-size:0.7rem">updates live</span></h3>
+      <div id="rps-adaptive-bars" class="stratbars"></div>
     </div>
 
     <div id="rps-score-chart" class="chart-sm" style="display:none"></div>
 
     <h3>Round log</h3>
     <div class="log">
-      <table class="tbl" id="rps-log">
+      <table class="tbl" id="rps-log" style="width:100%">
         <thead><tr><th>#</th><th>P1</th><th>P2</th><th>P1 payoff</th><th>Score</th></tr></thead>
         <tbody></tbody>
       </table>
@@ -166,6 +188,11 @@ read the theory.</p>
   <div class="figure">
     <img src="/figures/week02_rps_average_strategy_seed0.png" alt="RPS average strategy convergence">
     <figcaption>Average strategy convergence to the Nash equilibrium, seed 0.</figcaption>
+  </div>
+  <div class="figure">
+    <img src="/figures/week02_rps_average_regret_seed0.png" alt="RPS average regret decay">
+    <figcaption>Average regret decay \(R_T/T\), log–log (seed 0): a straight \(\sim 1/T\) line over
+    four decades.</figcaption>
   </div>
 </div>
 </div>

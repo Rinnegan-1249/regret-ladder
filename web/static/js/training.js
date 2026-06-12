@@ -1,5 +1,29 @@
 // Live-training SSE consumers for the RPS and Kuhn pages.
 // Streams carry BOTH players' data; the player toggle just re-renders.
+
+// Shared dark Plotly layout matching the site theme.
+function darkLayout(overrides) {
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "JetBrains Mono, monospace", size: 11.5, color: "#8b96ab" },
+    title: { font: { family: "Space Grotesk, sans-serif", size: 15, color: "#e6ebf5" } },
+    xaxis: { gridcolor: "rgba(255,255,255,0.07)", zerolinecolor: "rgba(255,255,255,0.12)" },
+    yaxis: { gridcolor: "rgba(255,255,255,0.07)", zerolinecolor: "rgba(255,255,255,0.12)" },
+    legend: { bgcolor: "rgba(0,0,0,0)" },
+    margin: { t: 46, r: 20, b: 50, l: 60 },
+    height: 400,
+  }, overrides || {});
+}
+
+function mergeAxes(layout, x, y) {
+  layout.xaxis = Object.assign({}, layout.xaxis, x);
+  layout.yaxis = Object.assign({}, layout.yaxis, y);
+  return layout;
+}
+
+const PLOT_CONFIG = { displayModeBar: false, responsive: true };
+
 (() => {
   const el = (id) => document.getElementById(id);
 
@@ -8,26 +32,47 @@
     let data = { t: [], p1: [[], [], []], p2: [[], [], []], r1: [], r2: [] };
     let stream = null;
 
-    function renderRps() {
-      const player = el("rps-train-player").value;
-      const avg = player === "1" ? data.p1 : data.p2;
-      const names = ["rock", "paper", "scissors"];
-      Plotly.react("rps-strategy-chart",
-        names.map((n, i) => ({ x: data.t, y: avg[i], mode: "lines", name: `P${player} avg ${n}` }))
-          .concat([{ x: [1, data.t[data.t.length - 1] || 1], y: [1 / 3, 1 / 3],
-            mode: "lines", name: "Nash = 1/3", line: { dash: "dash", color: "#888" } }]),
-        { title: `Average strategy convergence — Player ${player}`,
-          xaxis: { type: "log", title: "Iteration" },
-          yaxis: { title: "Probability", range: [0, 1] }, margin: { t: 40 } },
-        { displayModeBar: false });
-      Plotly.react("rps-regret-chart",
-        [{ x: data.t, y: data.r1, mode: "lines", name: "P1 avg regret" },
-         { x: data.t, y: data.r2, mode: "lines", name: "P2 avg regret" }],
-        { title: "Average regret decay",
-          xaxis: { type: "log", title: "Iteration" },
-          yaxis: { type: "log", title: "R_T / T" }, margin: { t: 40 } },
-        { displayModeBar: false });
+    function rpsStrategyLayout(player) {
+      return mergeAxes(darkLayout({ title: { text: `Average strategy convergence — Player ${player}` } }),
+        { type: "log", title: { text: "Iteration" } },
+        { title: { text: "Probability" }, range: [0, 1] });
     }
+    function rpsRegretLayout() {
+      return mergeAxes(darkLayout({ title: { text: "Average regret decay (log–log)" }, height: 320 }),
+        { type: "log", title: { text: "Iteration" } },
+        { type: "log", title: { text: "R_T / T" } });
+    }
+
+    function renderRps() {
+      try {
+        const player = el("rps-train-player").value;
+        const avg = player === "1" ? data.p1 : data.p2;
+        const names = ["rock", "paper", "scissors"];
+        const colors = ["#38bdf8", "#34e3a4", "#fbbf24"];
+        const traces = names.map((n, i) => ({
+          x: data.t, y: avg[i], mode: "lines", name: `P${player} avg ${n}`,
+          line: { color: colors[i], width: 2 },
+        }));
+        traces.push({
+          x: [1, data.t[data.t.length - 1] || 10], y: [1 / 3, 1 / 3], mode: "lines",
+          name: "Nash = 1/3", line: { dash: "dash", color: "#8b96ab", width: 1.5 },
+        });
+        Plotly.react("rps-strategy-chart", traces, rpsStrategyLayout(player), PLOT_CONFIG);
+        Plotly.react("rps-regret-chart",
+          [{ x: data.t, y: data.r1, mode: "lines", name: "P1 avg regret", line: { color: "#34e3a4", width: 2 } },
+           { x: data.t, y: data.r2, mode: "lines", name: "P2 avg regret", line: { color: "#38bdf8", width: 2 } }],
+          rpsRegretLayout(), PLOT_CONFIG);
+      } catch (err) {
+        setStatus(el("rps-train-status"), `Chart error: ${err.message}`, true);
+      }
+    }
+
+    // Placeholder axes so the pane never looks empty.
+    function placeholders() {
+      Plotly.react("rps-strategy-chart", [], rpsStrategyLayout(el("rps-train-player").value), PLOT_CONFIG);
+      Plotly.react("rps-regret-chart", [], rpsRegretLayout(), PLOT_CONFIG);
+    }
+    window.rpsTrainPlaceholders = () => { if (!data.t.length) placeholders(); };
 
     el("rps-train-player").addEventListener("change", renderRps);
 
@@ -44,7 +89,7 @@
         data.r2.push(Math.max(ev.p2_avg_regret, 1e-12));
         renderRps();
         setStatus(el("rps-train-status"), `Iteration ${ev.t.toLocaleString()} / ${T.toLocaleString()}`);
-      }, () => setStatus(el("rps-train-status"), "Done."),
+      }, () => setStatus(el("rps-train-status"), "Done — strategies converged toward (1/3, 1/3, 1/3)."),
          (err) => setStatus(el("rps-train-status"), err.message, true));
     });
   }
@@ -68,24 +113,43 @@
       return `${cards[info[0]]}${betting ? " after '" + betting + "'" : " (opening)"}`;
     }
 
-    function renderKuhn() {
-      const player = el("kuhn-train-player").value;
-      const sets = kd.infosets[`p${player}`];
-      const traces = Object.keys(sets).sort().map((info) => ({
-        x: kd.t, y: sets[info], mode: "lines", name: infosetLabel(info),
-      }));
-      Plotly.react("kuhn-strategy-chart", traces,
-        { title: `Average strategy: P(bet/call) at Player ${player}'s information sets`,
-          xaxis: { type: "log", title: "Iteration" },
-          yaxis: { title: "P(bet/call)", range: [-0.02, 1.02] }, margin: { t: 40 } },
-        { displayModeBar: false });
-      Plotly.react("kuhn-expl-chart",
-        [{ x: kd.t, y: kd.expl.map((e) => Math.max(e, 1e-12)), mode: "lines", name: "exploitability" }],
-        { title: "Exploitability of the average strategy",
-          xaxis: { type: "log", title: "Iteration" },
-          yaxis: { type: "log", title: "Exploitability" }, margin: { t: 40 } },
-        { displayModeBar: false });
+    function kuhnStrategyLayout(player) {
+      return mergeAxes(darkLayout({
+        title: { text: `Average strategy: P(bet/call) at Player ${player}'s information sets` } }),
+        { type: "log", title: { text: "Iteration" } },
+        { title: { text: "P(bet/call)" }, range: [-0.02, 1.02] });
     }
+    function kuhnExplLayout() {
+      return mergeAxes(darkLayout({ title: { text: "Exploitability of the average strategy (log–log)" }, height: 320 }),
+        { type: "log", title: { text: "Iteration" } },
+        { type: "log", title: { text: "Exploitability" } });
+    }
+
+    const ISET_COLORS = ["#34e3a4", "#38bdf8", "#fbbf24", "#f87171", "#c084fc", "#fb923c"];
+
+    function renderKuhn() {
+      try {
+        const player = el("kuhn-train-player").value;
+        const sets = kd.infosets[`p${player}`];
+        const traces = Object.keys(sets).sort().map((info, i) => ({
+          x: kd.t, y: sets[info], mode: "lines", name: infosetLabel(info),
+          line: { color: ISET_COLORS[i % ISET_COLORS.length], width: 2 },
+        }));
+        Plotly.react("kuhn-strategy-chart", traces, kuhnStrategyLayout(player), PLOT_CONFIG);
+        Plotly.react("kuhn-expl-chart",
+          [{ x: kd.t, y: kd.expl.map((e) => Math.max(e, 1e-12)), mode: "lines",
+             name: "exploitability", line: { color: "#34e3a4", width: 2 } }],
+          kuhnExplLayout(), PLOT_CONFIG);
+      } catch (err) {
+        setStatus(el("kuhn-train-status"), `Chart error: ${err.message}`, true);
+      }
+    }
+
+    function placeholders() {
+      Plotly.react("kuhn-strategy-chart", [], kuhnStrategyLayout(el("kuhn-train-player").value), PLOT_CONFIG);
+      Plotly.react("kuhn-expl-chart", [], kuhnExplLayout(), PLOT_CONFIG);
+    }
+    window.kuhnTrainPlaceholders = () => { if (!kd.t.length) placeholders(); };
 
     el("kuhn-train-player").addEventListener("change", renderKuhn);
 
@@ -104,7 +168,6 @@
             if (!kd.infosets[p][info]) kd.infosets[p][info] = new Array(kd.t.length - 1).fill(null);
             kd.infosets[p][info].push(prob);
           }
-          // pad infosets missing from this checkpoint
           for (const arr of Object.values(kd.infosets[p])) {
             while (arr.length < kd.t.length) arr.push(arr[arr.length - 1]);
           }
