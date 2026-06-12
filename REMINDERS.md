@@ -2,6 +2,21 @@
 
 Items Claude flags for human review land here. Check them off (or delete them) once handled.
 
+## From the 2026-06-12 session (website)
+
+- [ ] **Proofread the site's theory text** (`web/templates/index.html`, `rps.html`
+  theory tab, `kuhn.html` theory tab) — the math follows Zinkevich/Tammelin/Lanctot and
+  the observability note cites Hart & Mas-Colell 2000/2001 + Blackwell 1956; verify the
+  wording matches how you'd present it to your professor.
+- [ ] **Try the site end-to-end yourself**: `uvicorn web.app:app` → play the adaptive
+  RPS bot (spam rock, watch it shift to paper), play Kuhn vs CFR+, run a live training
+  for each algorithm. First CFR-bot use trains policies (~45s total, then cached).
+- [ ] **Consider screenshots** of the live-training graphs and play UI for the Week 4
+  deck / final report.
+- [ ] **Deployment decision (later)**: the site needs Python, so GitHub Pages won't
+  host it; if you want it public, a free Render/Railway tier or a recorded demo video
+  are the usual options.
+
 ## From the 2026-06-12 session (Week 4 part 2: MCCFR)
 
 - [ ] **Review the three week04b figures** (`results/figures/week04b_*.png`) — the

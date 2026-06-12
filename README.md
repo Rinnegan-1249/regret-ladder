@@ -471,6 +471,23 @@ Python: Select Interpreter
 
 ## 12. How to Run
 
+### Interactive website
+
+A local research-demo website (FastAPI): play RPS against a frozen near-Nash bot or an
+adaptive regret-matching bot (Hart & Mas-Colell 2000); play Kuhn Poker against the five
+baselines and four CFR-family bots (frozen average policies trained by this repo's
+solvers); watch every algorithm train live (server-side training streamed to the
+browser); per-paper theory sections; a results page built from the real experiment
+figures; and a references page serving the three PDFs.
+
+```cmd
+pip install -r requirements.txt
+uvicorn web.app:app
+```
+
+Then open http://127.0.0.1:8000. The first use of each CFR-family bot trains and caches
+its policy under `web/cache/` (gitignored); subsequent launches are instant.
+
 ### OpenSpiel smoke test
 
 ```cmd

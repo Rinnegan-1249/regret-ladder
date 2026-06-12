@@ -92,8 +92,25 @@ All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--o
 - Expected-utility RPS from exactly-uniform start is a fixed point — do not remove the
   seeded random regret initialization in exp02.
 
+## Web demo (`web/`)
+
+FastAPI app (`uvicorn web.app:app`): RPS + Kuhn play vs real bots, live SSE training
+graphs, theory/results/references pages. Key modules: `web/bots.py` (policy training +
+JSON cache in gitignored `web/cache/`), `web/rps_engine.py` & `web/kuhn_engine.py`
+(in-memory match stores), `web/training_stream.py` (SSE generators with hard iteration
+caps), templates+vanilla JS with Plotly/KaTeX CDN. Tests in `tests/test_web.py` use a
+`fast_cfr_bots` fixture (tiny budgets, tmp cache). Gotcha: PowerShell mangles double
+quotes in inline `python -c` here-strings — use single quotes/percent-formatting.
+
 ## Progress log
 
+- **2026-06-12 (evening)** — Built the interactive website (`web/`): intro/home with
+  Zinkevich common theory, RPS page (human/distribution/frozen-RM/adaptive-RM seats,
+  hidden simultaneous reveal, live RM training stream, observability theory note with
+  Hart & Mas-Colell + Blackwell citations), Kuhn page (rules + betting-tree SVG, 5
+  baseline + 4 CFR-family bots, human play with hidden cards, live training for all 4
+  solvers with per-infoset strategy traces + exploitability), results page from real
+  figures, references page serving the 3 PDFs. 19 new tests (34 total).
 - **2026-06-12 (later still)** — Week 4 part 2: implemented OS-MCCFR and ES-MCCFR per
   Lanctot et al. 2009 (paper filed as `Research_Papers/MCCFR_Lanctot2009.pdf`);
   `experiments/exp04b_mccfr_kuhn.py` 4-way comparison (CFR, CFR+, OS, ES) with paper-style
