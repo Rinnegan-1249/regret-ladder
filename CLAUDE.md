@@ -110,6 +110,11 @@ Read the PNG.
 
 ## Progress log
 
+- **2026-06-13 (later)** — Site restructured into sections: nav = Home / Games /
+  Foundations / Regret / Results / References. New pages: /games (game index),
+  /foundations (extensive-form model), /regret (regret → CFR literature ladder).
+  Home is now a directory. Also: static cache-busting (?v=mtime), Plotly.react
+  .slice() fix for the blank live charts.
 - **2026-06-13** — Website redesign: dark neon theme (mint accent, Space Grotesk/Inter/
   JetBrains Mono, numbered sections, glass cards), gamified play (RPS duel reveal
   animation + streak + adaptive strategy bars; Kuhn poker-table with CSS 3D card flip
