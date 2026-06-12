@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}References — Regret Ladder{% endblock %}
+{% block content %}
+
+<h1>References</h1>
+<p class="subtitle">Primary literature followed by this project. The three papers driving the
+implementations are attached as PDFs.</p>
+
+<h2>Primary papers (PDFs)</h2>
+<ol class="refs">
+  <li>
+    <strong>[1]</strong> Martin Zinkevich, Michael Johanson, Michael Bowling, Carmelo Piccione.
+    <em>Regret Minimization in Games with Incomplete Information.</em>
+    Advances in Neural Information Processing Systems 20 (NIPS), 2007.
+    <span class="pdf">[<a href="/papers/NIPS07-cfr.pdf">PDF</a>]</span><br>
+    <span style="color:var(--muted)">Defines counterfactual value and counterfactual regret, proves the
+    regret decomposition theorem, and introduces vanilla CFR. Followed for: the common theory section,
+    regret matching on RPS, and vanilla CFR on Kuhn.</span>
+  </li>
+  <li>
+    <strong>[2]</strong> Marc Lanctot, Kevin Waugh, Martin Zinkevich, Michael Bowling.
+    <em>Monte Carlo Sampling for Regret Minimization in Extensive Games.</em>
+    Advances in Neural Information Processing Systems 22 (NIPS), 2009.
+    <span class="pdf">[<a href="/papers/MCCFR_Lanctot2009.pdf">PDF</a>]</span><br>
+    <span style="color:var(--muted)">Defines the MCCFR family via sampled counterfactual values
+    (unbiasedness Lemma 1), introduces outcome sampling (Eq. 10) and external sampling (Eq. 11) with
+    probabilistic regret bounds (Theorems 4–5). Followed for: both MCCFR solvers.</span>
+  </li>
+  <li>
+    <strong>[3]</strong> Oskari Tammelin.
+    <em>Solving Large Imperfect Information Games Using CFR+.</em>
+    arXiv:1407.5042, 2014.
+    <span class="pdf">[<a href="/papers/CFRplus_Tammelin2014.pdf">PDF</a>]</span><br>
+    <span style="color:var(--muted)">Introduces regret-matching+, alternating updates, and delayed
+    linear averaging; shows order-of-magnitude convergence gains and near-convergence of the current
+    strategy. Followed for: the CFR+ solver.</span>
+  </li>
+</ol>
+
+<h2>Supporting literature (cited in the above)</h2>
+<ol class="refs" start="4">
+  <li>
+    <strong>[4]</strong> Sergiu Hart, Andreu Mas-Colell.
+    <em>A Simple Adaptive Procedure Leading to Correlated Equilibrium.</em>
+    Econometrica 68(5):1127–1150, 2000.<br>
+    <span style="color:var(--muted)">The origin of regret matching. Crucially for this site's adaptive
+    RPS bot: the procedure is defined using <em>only the realized history of play</em> and its
+    guarantees hold regardless of what the opponents do — no knowledge of their mixed strategies is
+    required. Reference [2] of Zinkevich et al. and [2]/[7] of Lanctot et al.</span>
+  </li>
+  <li>
+    <strong>[5]</strong> Sergiu Hart, Andreu Mas-Colell.
+    <em>A General Class of Adaptive Strategies.</em>
+    Journal of Economic Theory 98:26–54, 2001.<br>
+    <span style="color:var(--muted)">Generalizes regret matching to a class of no-external-regret
+    strategies via Blackwell approachability.</span>
+  </li>
+  <li>
+    <strong>[6]</strong> David Blackwell.
+    <em>An Analog of the Minimax Theorem for Vector Payoffs.</em>
+    Pacific Journal of Mathematics 6:1–8, 1956.<br>
+    <span style="color:var(--muted)">Approachability theory — the foundation for why regret matching's
+    average regret vanishes against arbitrary opponent sequences ("Regret-matching satisfies Blackwell's
+    approachability criteria", Lanctot et al., footnote 2).</span>
+  </li>
+  <li>
+    <strong>[7]</strong> Harold W. Kuhn.
+    <em>Simplified Two-Person Poker.</em>
+    Contributions to the Theory of Games 1:97–103, 1950.<br>
+    <span style="color:var(--muted)">The game itself, including the one-parameter family of Nash
+    equilibria recovered by our solvers.</span>
+  </li>
+</ol>
+
+{% endblock %}

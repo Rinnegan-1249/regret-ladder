@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Regret Ladder — regret minimization in games{% endblock %}
+{% block content %}
+
+<h1>Regret Ladder</h1>
+<p class="subtitle">An interactive companion to a summer research project on regret minimization and
+counterfactual regret minimization (CFR) in games.</p>
+
+<div class="card">
+  <h3 style="margin-top:0">What this site is</h3>
+  <p>
+    This project builds a <em>ladder</em> of increasingly capable game-solving algorithms — starting from
+    regret matching on a normal-form game and climbing to the CFR family on an imperfect-information poker
+    game — with every step implemented from scratch, validated against
+    <a href="https://github.com/google-deepmind/open_spiel">OpenSpiel</a>'s reference solvers, and
+    accompanied by reproducible experiments. This site lets you <strong>play against the actual trained
+    bots</strong>, <strong>watch the algorithms train live</strong>, and read the theory behind each rung,
+    following the primary literature.
+  </p>
+  <div class="ladder">
+    <div class="step"><span class="rung">Rung 1</span><span class="what">Normal-form games, Nash equilibria, best responses</span></div>
+    <div class="step"><span class="rung">Rung 2</span><span class="what">Regret matching on Rock–Paper–Scissors (Hart &amp; Mas-Colell 2000)</span></div>
+    <div class="step"><span class="rung">Rung 3</span><span class="what">Vanilla CFR on Kuhn Poker (Zinkevich et al. 2007)</span></div>
+    <div class="step"><span class="rung">Rung 4</span><span class="what">CFR+ (Tammelin 2014) and Monte Carlo CFR (Lanctot et al. 2009)</span></div>
+    <div class="step todo"><span class="rung">Next</span><span class="what">Leduc Poker, abstraction, simplified Hold'em</span></div>
+  </div>
+</div>
+
+<h2>Games</h2>
+<div class="gallery">
+  <a class="game-card" href="/rps">
+    <h3>Rock–Paper–Scissors</h3>
+    <p>Play against a frozen near-Nash bot or an <em>adaptive</em> regret-matching bot that learns from your
+    realized moves. Watch regret matching converge to the (1/3, 1/3, 1/3) equilibrium live.</p>
+  </a>
+  <a class="game-card" href="/kuhn">
+    <h3>Kuhn Poker</h3>
+    <p>Three cards, one betting round, real bluffing. Play against five baseline bots and four CFR-family
+    bots (vanilla CFR, CFR+, OS-MCCFR, ES-MCCFR), and watch each algorithm train live.</p>
+  </a>
+</div>
+
+<h2>Common theory: regret and equilibria</h2>
+<p>
+  Everything on this site rests on one framework, due to
+  Zinkevich, Johanson, Bowling &amp; Piccione (2007) <a href="/references">[1]</a>, building on
+  Hart &amp; Mas-Colell (2000) <a href="/references">[4]</a>. The notation below follows [1].
+</p>
+
+<h3>Extensive games and strategies</h3>
+<p>
+  An <em>extensive game with imperfect information</em> consists of histories \(h\) of actions, terminal
+  histories \(z \in Z\) with utilities \(u_i(z)\), a player function (including chance \(c\)), and
+  <em>information sets</em> \(I \in \mathcal{I}_i\) — sets of histories player \(i\) cannot tell apart, at
+  which the player must therefore act with a single distribution. A strategy \(\sigma_i\) assigns a
+  distribution over actions to each information set; \(\pi^{\sigma}(h)\) is the reach probability of
+  \(h\), factored as \(\pi^{\sigma}_i(h)\,\pi^{\sigma}_{-i}(h)\) into the player's own contribution and
+  everyone else's (opponent and chance).
+</p>
+
+<h3>Average overall regret</h3>
+<p>If profile \(\sigma^t\) is played at round \(t\), player \(i\)'s average overall regret after \(T\) rounds is</p>
+<div class="eq">$$R^T_i \;=\; \frac{1}{T}\,\max_{\sigma^*_i \in \Sigma_i} \sum_{t=1}^{T}\Big(u_i(\sigma^*_i, \sigma^t_{-i}) - u_i(\sigma^t)\Big),$$</div>
+<p>and the <em>average strategy</em> \(\bar{\sigma}^T_i\) weights each round's strategy by the player's own reach:</p>
+<div class="eq">$$\bar{\sigma}^t_i(a\,|\,I) \;=\; \frac{\sum_{t=1}^{T} \pi^{\sigma^t}_i(I)\,\sigma^t(a\,|\,I)}{\sum_{t=1}^{T} \pi^{\sigma^t}_i(I)}.$$</div>
+
+<div class="note">
+  <strong>Theorem 1 (folk theorem; [1] Thm. 1).</strong> In a two-player zero-sum game, if both players'
+  average overall regret is at most \(\varepsilon\), then the average strategy profile
+  \(\bar{\sigma}^T\) is a \(2\varepsilon\)-Nash equilibrium. This is why every algorithm on this site
+  outputs its <em>average</em> strategy (CFR+ being a partial exception — its current strategy also
+  converges in practice).
+</div>
+
+<h3>Counterfactual regret</h3>
+<p>
+  CFR's key construction: the <em>counterfactual value</em> of information set \(I\) is the expected
+  utility given that player \(i\) plays to reach \(I\), weighted by the opponent's and chance's
+  probability of reaching it ([1] Eq. 4):
+</p>
+<div class="eq">$$v_i(\sigma, I) \;=\; \sum_{z \in Z_I} \pi^{\sigma}_{-i}(z[I])\;\pi^{\sigma}(z[I], z)\;u_i(z),$$</div>
+<p>and the <em>immediate counterfactual regret</em> of action \(a\) at \(I\) is ([1] Eq. 5)</p>
+<div class="eq">$$R^T_{i,\mathrm{imm}}(I,a) \;=\; \frac{1}{T} \sum_{t=1}^{T} \Big( v_i(\sigma^t_{(I \to a)}, I) - v_i(\sigma^t, I) \Big).$$</div>
+
+<div class="note">
+  <strong>Theorem 2 (regret decomposition; [1] Thm. 3).</strong>
+  \(R^T_i \le \sum_{I \in \mathcal{I}_i} R^{T,+}_{i,\mathrm{imm}}(I)\) where \(x^+ = \max(x, 0)\).
+  Overall regret is bounded by the sum of per-information-set regrets — so independently minimizing
+  regret at each information set (with regret matching) minimizes overall regret. With regret matching
+  at each information set, \(R^T_i \le \Delta_{u,i}\,|\mathcal{I}_i|\sqrt{|A_i|}/\sqrt{T}\), giving
+  \(O(1/\sqrt{T})\) convergence to equilibrium.
+</div>
+
+<p>
+  The per-game pages develop the specific algorithms: <a href="/rps">regret matching</a> (the
+  single-information-set special case, on RPS) and <a href="/kuhn">vanilla CFR, CFR+, and MCCFR</a>
+  (on Kuhn Poker), each following its primary paper.
+</p>
+
+<h2 id="references">References</h2>
+<p>See the full <a href="/references">references page</a>; the three primary papers are available as PDFs:</p>
+<ol class="refs">
+  <li>Zinkevich, Johanson, Bowling, Piccione — <em>Regret Minimization in Games with Incomplete Information</em>, NIPS 2007. <span class="pdf">[<a href="/papers/NIPS07-cfr.pdf">PDF</a>]</span></li>
+  <li>Lanctot, Waugh, Zinkevich, Bowling — <em>Monte Carlo Sampling for Regret Minimization in Extensive Games</em>, NIPS 2009. <span class="pdf">[<a href="/papers/MCCFR_Lanctot2009.pdf">PDF</a>]</span></li>
+  <li>Tammelin — <em>Solving Large Imperfect Information Games Using CFR+</em>, arXiv:1407.5042, 2014. <span class="pdf">[<a href="/papers/CFRplus_Tammelin2014.pdf">PDF</a>]</span></li>
+</ol>
+
+{% endblock %}
