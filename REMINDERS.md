@@ -2,6 +2,15 @@
 
 Items Claude flags for human review land here. Check them off (or delete them) once handled.
 
+## From the 2026-06-13 session (website redesign)
+
+- [ ] **Visually verify the redesign** (hard-refresh with Ctrl+F5 to bust cached
+  CSS/JS): dark theme everywhere, RPS duel animation + verdict glow, Kuhn card flip at
+  showdown (and face-down on folds), and — the bug you reported — BOTH charts now
+  render in each Live-training tab, including after switching tabs mid-training.
+- [ ] If any chart still looks blank, open the browser console (F12) and send me the
+  error — chart errors now also print into the status line under the Train button.
+
 ## From the 2026-06-12 session (website)
 
 - [ ] **Proofread the site's theory text** (`web/templates/index.html`, `rps.html`

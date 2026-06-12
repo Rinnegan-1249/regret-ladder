@@ -104,6 +104,13 @@ quotes in inline `python -c` here-strings — use single quotes/percent-formatti
 
 ## Progress log
 
+- **2026-06-13** — Website redesign: dark neon theme (mint accent, Space Grotesk/Inter/
+  JetBrains Mono, numbered sections, glass cards), gamified play (RPS duel reveal
+  animation + streak + adaptive strategy bars; Kuhn poker-table with CSS 3D card flip
+  at showdown, pot/betting chips, bankroll sparkline). Fixed missing live charts:
+  Plotly in hidden tab panes had zero width — initTabs now resizes on pane activation
+  and training tabs draw placeholder axes immediately (shared darkLayout helper in
+  training.js).
 - **2026-06-12 (evening)** — Built the interactive website (`web/`): intro/home with
   Zinkevich common theory, RPS page (human/distribution/frozen-RM/adaptive-RM seats,
   hidden simultaneous reveal, live RM training stream, observability theory note with
