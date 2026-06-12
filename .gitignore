@@ -11,6 +11,9 @@ poker_ai.egg-info/
 results/logs/
 results/checkpoints/*
 
+# Website bot-policy cache (regenerated on first launch)
+web/cache/
+
 # OS / editor
 .DS_Store
 .vscode/

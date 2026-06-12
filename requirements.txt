@@ -9,3 +9,9 @@ pytest
 jupyter
 ipykernel
 tabulate
+
+# Interactive website (web/)
+fastapi
+uvicorn[standard]
+jinja2
+httpx
