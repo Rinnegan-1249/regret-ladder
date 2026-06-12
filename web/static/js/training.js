@@ -49,8 +49,11 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
         const avg = player === "1" ? data.p1 : data.p2;
         const names = ["rock", "paper", "scissors"];
         const colors = ["#38bdf8", "#34e3a4", "#fbbf24"];
+        // IMPORTANT: pass fresh copies (.slice()) — Plotly.react compares by
+        // reference, so arrays mutated in place with push() are treated as
+        // unchanged and the chart never redraws.
         const traces = names.map((n, i) => ({
-          x: data.t, y: avg[i], mode: "lines", name: `P${player} avg ${n}`,
+          x: data.t.slice(), y: avg[i].slice(), mode: "lines", name: `P${player} avg ${n}`,
           line: { color: colors[i], width: 2 },
         }));
         traces.push({
@@ -59,8 +62,8 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
         });
         Plotly.react("rps-strategy-chart", traces, rpsStrategyLayout(player), PLOT_CONFIG);
         Plotly.react("rps-regret-chart",
-          [{ x: data.t, y: data.r1, mode: "lines", name: "P1 avg regret", line: { color: "#34e3a4", width: 2 } },
-           { x: data.t, y: data.r2, mode: "lines", name: "P2 avg regret", line: { color: "#38bdf8", width: 2 } }],
+          [{ x: data.t.slice(), y: data.r1.slice(), mode: "lines", name: "P1 avg regret", line: { color: "#34e3a4", width: 2 } },
+           { x: data.t.slice(), y: data.r2.slice(), mode: "lines", name: "P2 avg regret", line: { color: "#38bdf8", width: 2 } }],
           rpsRegretLayout(), PLOT_CONFIG);
       } catch (err) {
         setStatus(el("rps-train-status"), `Chart error: ${err.message}`, true);
@@ -131,8 +134,9 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
       try {
         const player = el("kuhn-train-player").value;
         const sets = kd.infosets[`p${player}`];
+        // Fresh copies for the same Plotly.react reference-equality reason.
         const traces = Object.keys(sets).sort().map((info, i) => ({
-          x: kd.t, y: sets[info], mode: "lines", name: infosetLabel(info),
+          x: kd.t.slice(), y: sets[info].slice(), mode: "lines", name: infosetLabel(info),
           line: { color: ISET_COLORS[i % ISET_COLORS.length], width: 2 },
         }));
         Plotly.react("kuhn-strategy-chart", traces, kuhnStrategyLayout(player), PLOT_CONFIG);
