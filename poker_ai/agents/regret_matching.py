@@ -88,6 +88,40 @@ class RegretMatchingAgent:
         self.strategy_sum += strategy
         self.iterations += 1
 
+    def update_expected(
+        self,
+        strategy: np.ndarray,
+        action_utilities: np.ndarray,
+    ) -> None:
+        """
+        Expected-utility regret update.
+
+        Unlike update(), no action is sampled: the baseline is the expected
+        utility of our own mixed strategy, and action_utilities are computed
+        against the opponent's full strategy distribution.
+
+        Args:
+            strategy:
+                Strategy played this iteration (the full distribution).
+
+            action_utilities:
+                action_utilities[a] = expected payoff of action a against
+                the opponent's strategy distribution.
+
+        Regret update:
+            regret_sum[a] += action_utilities[a] - strategy @ action_utilities
+        """
+        if strategy.shape != (self.num_actions,):
+            raise ValueError("strategy has wrong shape.")
+
+        if action_utilities.shape != (self.num_actions,):
+            raise ValueError("action_utilities has wrong shape.")
+
+        expected_utility = float(strategy @ action_utilities)
+        self.regret_sum += action_utilities - expected_utility
+        self.strategy_sum += strategy
+        self.iterations += 1
+
     def average_strategy(self) -> np.ndarray:
         """Return average strategy over all iterations so far."""
         if self.iterations == 0:

@@ -21,7 +21,10 @@ def run_self_play(
     """
     Run regret matching self-play on Rock-Paper-Scissors.
 
-    Both players use regret matching.
+    Both players use expected-utility regret matching: regrets are computed
+    against the opponent's full strategy distribution rather than a single
+    sampled action, so the dynamics are deterministic given the
+    initialization.
 
     Returns:
         List of logged rows.
@@ -35,6 +38,14 @@ def run_self_play(
     p1 = RegretMatchingAgent(num_actions=3, seed=seed)
     p2 = RegretMatchingAgent(num_actions=3, seed=seed + 10_000)
 
+    # Symmetry-breaking perturbation: with expected updates, the uniform
+    # strategy is a fixed point (every action has expected utility 0 against
+    # a uniform opponent, so regrets never move). Seed small random initial
+    # regrets so each seed produces a distinct non-trivial trajectory that
+    # converges back to the Nash equilibrium (1/3, 1/3, 1/3).
+    p1.regret_sum[:] = p1.rng.uniform(0.0, 1.0, size=3)
+    p2.regret_sum[:] = p2.rng.uniform(0.0, 1.0, size=3)
+
     uniform = np.full(3, 1.0 / 3.0)
     rows: list[dict] = []
 
@@ -43,27 +54,24 @@ def run_self_play(
         p1_strategy = p1.current_strategy()
         p2_strategy = p2.current_strategy()
 
-        # 2. Each player samples action.
-        p1_action = p1.sample_action(p1_strategy)
-        p2_action = p2.sample_action(p2_strategy)
+        # 2. For player 1:
+        #    action_utilities_p1[a] = expected payoff of action a against
+        #    P2's full strategy distribution.
+        action_utilities_p1 = PAYOFF_MATRIX @ p2_strategy
 
-        # 3. For player 1:
-        #    action_utilities_p1[a] = payoff if P1 had played action a
-        #    against P2's realized action.
-        action_utilities_p1 = PAYOFF_MATRIX[:, p2_action].copy()
-
-        # 4. For player 2:
-        #    action_utilities_p2[a] = payoff if P2 had played action a
-        #    against P1's realized action.
+        # 3. For player 2:
+        #    action_utilities_p2[a] = expected payoff of action a against
+        #    P1's full strategy distribution.
         #
-        # Since PAYOFF_MATRIX is from row player's perspective:
-        # payoff to P2 for action a against P1 action p1_action
-        # equals PAYOFF_MATRIX[a, p1_action].
-        action_utilities_p2 = PAYOFF_MATRIX[:, p1_action].copy()
+        # PAYOFF_MATRIX is from the row player's perspective and RPS is
+        # skew-symmetric (M = -M^T), so the payoff to P2 for action a
+        # against P1 action b equals PAYOFF_MATRIX[a, b]. Taking the
+        # expectation over P1's strategy gives PAYOFF_MATRIX @ p1_strategy.
+        action_utilities_p2 = PAYOFF_MATRIX @ p1_strategy
 
-        # 5. Update regret tables.
-        p1.update(p1_strategy, p1_action, action_utilities_p1)
-        p2.update(p2_strategy, p2_action, action_utilities_p2)
+        # 4. Update regret tables (baseline = own expected utility).
+        p1.update_expected(p1_strategy, action_utilities_p1)
+        p2.update_expected(p2_strategy, action_utilities_p2)
 
         # 6. Log progress.
         if t == 1 or t % log_every == 0 or t == iterations:
@@ -189,7 +197,6 @@ def main() -> None:
 
     plot_average_strategy(df, strategy_fig_path)
     plot_average_regret(df, regret_fig_path)
-
     final = df.iloc[-1]
 
     p1_final = np.array(

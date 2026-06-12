@@ -1,6 +1,8 @@
-# Poker Project
+# Regret Ladder — Poker AI Research Project
 
 This project is built around OpenSpiel, beginning with simple baseline agents on Kuhn Poker and progressing toward regret-minimization methods such as Regret Matching, Vanilla CFR, CFR+, and Monte Carlo CFR.
+
+**Current status: Weeks 1–3 implemented** — baseline tournament on Kuhn Poker (Week 1), expected-utility regret matching on Rock-Paper-Scissors (Week 2), and from-scratch Vanilla CFR on Kuhn Poker validated against OpenSpiel, with exploitability tracking (Week 3).
 
 The central goal is not to jump directly to full Texas Hold'em. The project is intentionally narrow and deep: build a clean, reproducible pipeline on small imperfect-information poker games, validate each step, and only then scale from Kuhn Poker to Leduc Poker.
 
@@ -95,57 +97,93 @@ Full Texas Hold'em is explicitly out of scope for the core project because it re
 ## 5. Repository Structure
 
 ```text
-poker-ai/
+regret-ladder/
 ├── README.md
 ├── pyproject.toml
 ├── requirements.txt
-├── poker_ai/
+├── poker_ai/                      # installed package (pip install -e .)
 │   ├── agents/
-│   │   ├── base.py
-│   │   ├── random_agent.py
+│   │   ├── base.py                # abstract Agent interface
+│   │   ├── random_agent.py        # Week 1 baselines...
 │   │   ├── always_call.py
 │   │   ├── always_fold.py
 │   │   ├── rule_based.py
-│   │   └── ev_heuristic.py
+│   │   ├── ev_heuristic.py
+│   │   ├── baselines.py           # convenience aggregator for the baselines
+│   │   ├── regret_matching.py     # Week 2: regret matching (sampled + expected updates)
+│   │   ├── cfr.py                 # Week 3: VanillaCFR + PolicyAgent
+│   │   └── openspiel_solver.py    # Week 3: OpenSpiel CFRSolver wrapper
+│   ├── env/
+│   │   └── rps.py                 # Rock-Paper-Scissors payoff matrix and helpers
 │   ├── evaluation/
-│   │   ├── tournament.py
-│   │   └── stats.py
+│   │   ├── tournament.py          # duplicate-pair matches, round-robin, paper-style tables
+│   │   ├── exploitability.py      # OpenSpiel exploitability wrapper
+│   │   └── stats.py               # MatchStats, confidence intervals
 │   └── utils/
 │       └── seeding.py
-├── experiments/
-│   └── exp01_baseline_tournament.py
-├── scripts/
+├── experiments/                   # weekly deliverable experiments
+│   ├── exp01_baseline_tournament.py   # Week 1
+│   ├── exp02_rps_convergence.py       # Week 2
+│   ├── exp03_train_cfr.py             # Week 3: CFR convergence + exploitability
+│   └── exp03_week3_tournament.py      # Week 3: cross-table with CFR agents
+├── scripts/                       # utilities, demos, report generators
 │   ├── smoke_test_openspiel.py
 │   ├── observe_openspiel_game.py
-│   └── make_week01_report.py
+│   ├── demo_bot_duplicate_pairs.py
+│   ├── play_human_round_robin.py
+│   ├── play_human_mystery_bots.py
+│   ├── make_week01_report.py
+│   ├── make_week01_brief_report.py
+│   └── validate_week3.py          # validate VanillaCFR vs OpenSpiel CFRSolver
+├── tests/                         # pytest sanity tests
 ├── results/
-│   ├── tables/
-│   └── logs/
-├── reports/
-│   └── weekly/
-├── slides/
-│   └── weekly/
-├── docs/
-│   └── week01/
-└── tests/
+│   ├── tables/                    # CSV result tables (tracked)
+│   ├── figures/                   # PNG plots (tracked)
+│   ├── logs/                      # generated logs (gitignored)
+│   └── checkpoints/               # (gitignored)
+├── reports/weekly/                # weekly reports and PDFs
+├── slides/weekly/                 # presentation decks
+├── docs/                          # roadmap PDF, repo audit, structure notes
+├── Research_Papers/               # reference papers (NIPS07 CFR)
+└── archive/legacy_before_cleanup/ # superseded files kept for reference
 ```
 
 ### Folder roles
 
-- `poker_ai/agents/`: bot implementations.
-- `poker_ai/evaluation/`: tournament, duplicate-pair evaluation, statistics.
-- `experiments/`: runnable experiment scripts.
-- `scripts/`: utility scripts for smoke tests, reports, and observing a single hand.
-- `results/tables/`: CSV result tables.
-- `results/logs/`: generated logs and observer transcripts.
-- `reports/weekly/`: weekly reports and PDFs.
-- `slides/weekly/`: weekly presentation decks and PDFs.
-- `docs/week01/`: detailed explanatory notes, longer than weekly reports.
-- `tests/`: sanity tests for agents and tournament logic.
+- `poker_ai/agents/`: bot implementations and solvers (baselines, regret matching, CFR).
+- `poker_ai/env/`: toy game definitions (RPS payoff matrix).
+- `poker_ai/evaluation/`: tournament, duplicate-pair evaluation, exploitability, statistics.
+- `experiments/`: runnable weekly-deliverable experiment scripts (run from repo root).
+- `scripts/`: utility scripts for smoke tests, reports, demos, and validation.
+- `results/tables/`, `results/figures/`: CSV tables and PNG plots committed as deliverables.
+- `results/logs/`: generated logs and observer transcripts (not tracked).
+- `reports/weekly/`, `slides/weekly/`: weekly reports and presentation decks.
+- `docs/`: roadmap, repo audit, and structure documentation (see `docs/repo_structure.md`).
+- `archive/legacy_before_cleanup/`: superseded files preserved during repo cleanup.
+- `tests/`: sanity tests for agents, tournament logic, regret matching, and CFR.
 
 ---
 
-## 6. Week 1 Status
+## 6. Status by Week
+
+### Week 2: Regret Matching on Rock-Paper-Scissors
+
+- `RegretMatchingAgent` with two update rules:
+  - `update()`: sampled-action regret update (baseline = realized action utility),
+  - `update_expected()`: expected-utility update against the opponent's full
+    strategy distribution (baseline = own expected utility). The Week 2
+    experiment uses the expected-utility rule, with a small seeded random
+    regret initialization to break the uniform-strategy fixed point.
+- Average strategy converges to the Nash equilibrium (1/3, 1/3, 1/3).
+- Plots: average-strategy convergence and average-regret decay (log-log), 5 seeds.
+
+### Week 3: Vanilla CFR on Kuhn Poker
+
+- From-scratch tabular `VanillaCFR` (simultaneous-update, frozen regret tables).
+- Exploitability tracked per iteration and validated against OpenSpiel's `CFRSolver`.
+- Paper-style payoff cross-table: 5 baselines + our CFR + OpenSpiel CFR.
+
+### Week 1: Setup and baselines
 
 Week 1 built the initial experimental pipeline.
 
@@ -371,7 +409,7 @@ Then select:
 ```text
 Ctrl + Shift + P
 Python: Select Interpreter
-C:\Users\hp\Desktop\poker-ai-week1-starter\.venv\Scripts\python.exe
+<repo root>\.venv\Scripts\python.exe
 ```
 
 ---
@@ -422,6 +460,49 @@ Output:
 reports/weekly/week01.md
 ```
 
+### Run Week 2 RPS regret matching (one run per seed)
+
+```cmd
+python experiments\exp02_rps_convergence.py --seed 0 --iterations 100000
+python experiments\exp02_rps_convergence.py --seed 1 --iterations 100000
+python experiments\exp02_rps_convergence.py --seed 2 --iterations 100000
+python experiments\exp02_rps_convergence.py --seed 3 --iterations 100000
+python experiments\exp02_rps_convergence.py --seed 4 --iterations 100000
+```
+
+Outputs:
+
+```text
+results/tables/exp02_rps_convergence_seed{N}.csv
+results/figures/week02_rps_average_strategy_seed{N}.png
+results/figures/week02_rps_average_regret_seed{N}.png
+```
+
+### Run Week 3 CFR experiments
+
+```cmd
+:: 1) Validate our CFR against OpenSpiel
+python scripts\validate_week3.py --game kuhn_poker --iters 1000
+
+:: 2) Convergence CSV + exploitability plot
+python experiments\exp03_train_cfr.py --game kuhn_poker --iters 10000
+
+:: 3) Paper-style payoff cross-table
+python experiments\exp03_week3_tournament.py --game kuhn_poker --cfr-iters 10000 --n-pairs 10000 --seeds 0 1 2 3 4
+```
+
+For a fast smoke run, use `--iters 500 --cfr-iters 500 --n-pairs 1000`.
+
+Outputs:
+
+```text
+results/tables/week03_cfr_convergence.csv
+results/figures/week03_cfr_convergence.png
+results/tables/week03_payoff_matrix.csv
+results/tables/week03_pairwise_with_ci.csv
+results/figures/week03_payoff_matrix.png
+```
+
 ### Observe one hand step-by-step
 
 ```cmd
@@ -440,26 +521,28 @@ This transcript shows the OpenSpiel functions being used: chance outcomes, legal
 
 ## 13. Roadmap
 
-### Week 1: Setup and baselines
+### Week 1: Setup and baselines — DONE
 
 - Set up OpenSpiel.
 - Implement baseline agents.
 - Run Kuhn Poker tournament.
 - Produce reports and slides.
 
-### Week 2: Regret Matching
+### Week 2: Regret Matching — DONE
 
-- Implement regret matching on Rock-Paper-Scissors.
+- Implement regret matching on Rock-Paper-Scissors (expected-utility updates).
 - Plot average strategy convergence.
 - Plot regret decay.
 
-### Week 3: Vanilla CFR on Kuhn Poker
+### Week 3: Vanilla CFR on Kuhn Poker — DONE
 
 - Implement CFR from scratch.
 - Track exploitability.
 - Validate against OpenSpiel's CFR solver.
 
-### Week 4: CFR+ and Outcome-Sampling MCCFR
+### Week 4: CFR+ and Outcome-Sampling MCCFR — NEXT
+
+Plus: Hold'em terminology and groundwork for simplified Hold'em / abstraction later.
 
 - Implement CFR+.
 - Implement outcome-sampling MCCFR.
