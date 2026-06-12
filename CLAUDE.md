@@ -26,14 +26,18 @@ Week 1: baselines on Kuhn Poker → Week 2: regret matching on RPS → Week 3: V
 on Kuhn → Week 4+: CFR+, MCCFR (outcome/external sampling), Leduc Poker, Hold'em
 terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of scope.
 
-## Current status: Weeks 1–3 done; Week 4 CFR+ done (OS-MCCFR pending)
+## Current status: Weeks 1–4 done (+ ES-MCCFR from Week 5); next: Leduc
 
-- **Week 4 (partial):** `CFRPlus` in `poker_ai/agents/cfr_plus.py` (Tammelin 2014:
-  regret-matching+ floor, alternating updates, linear weighted averaging with delay d).
-  Validated vs OpenSpiel `CFRPlusSolver`. exp04 results: CFR+ avg-strategy exploitability
-  9.1e-06 vs CFR 2.3e-03 at 10k iters; CFR+ current strategy converges (8.5e-03, decaying)
-  while CFR current oscillates (~1.5e-01); recovered exact Kuhn Nash family member
-  (alpha=0.2226, bet K = 3*alpha). OS-MCCFR still needed to complete roadmap Week 4.
+- **Week 4:** `CFRPlus` (`agents/cfr_plus.py`, Tammelin 2014: regret-matching+ floor,
+  alternating updates, linear weighted averaging w_t = max(t-d, 0)). exp04: CFR+ avg
+  exploitability 9.1e-06 vs CFR 2.3e-03 at 10k iters; CFR+ current strategy converges,
+  CFR current oscillates; exact Kuhn Nash family recovered (alpha=0.2226, bet K = 3*alpha).
+  Also `OutcomeSamplingMCCFR` (`agents/mccfr_outcome.py`, eps-greedy 0.6, importance-
+  corrected Eq.10 updates) and `ExternalSamplingMCCFR` (`agents/mccfr_external.py`, Eq.11,
+  simple averaging at opponent nodes) per Lanctot et al. 2009; both have `nodes_touched`
+  counters and seeded rngs. exp04b: 4-way overlay (CFR, CFR+, OS, ES) by nodes touched /
+  iterations / wall-clock. All validated vs OpenSpiel reference solvers
+  (validate_week3/4/4b scripts).
 
 - **Week 1:** 5 baseline agents (random, always_call, always_fold, rule_based,
   ev_heuristic), duplicate-pair evaluation, multi-seed round-robin tournament on Kuhn.
@@ -69,6 +73,8 @@ python experiments\exp03_week3_tournament.py --game kuhn_poker --cfr-iters 10000
 python scripts\validate_week3.py --game kuhn_poker --iters 1000
 python experiments\exp04_cfr_variants_kuhn.py --game kuhn_poker --iters 10000 --delay 0
 python scripts\validate_week4.py --game kuhn_poker --iters 1000
+python experiments\exp04b_mccfr_kuhn.py --iters 10000 --os-iters 200000 --es-iters 50000 --seeds 0 1 2
+python scripts\validate_week4b.py --os-iters 100000 --es-iters 20000
 ```
 
 All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--out-dir`)
@@ -88,6 +94,11 @@ All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--o
 
 ## Progress log
 
+- **2026-06-12 (later still)** — Week 4 part 2: implemented OS-MCCFR and ES-MCCFR per
+  Lanctot et al. 2009 (paper filed as `Research_Papers/MCCFR_Lanctot2009.pdf`);
+  `experiments/exp04b_mccfr_kuhn.py` 4-way comparison (CFR, CFR+, OS, ES) with paper-style
+  nodes-touched plot; `scripts/validate_week4b.py` vs OpenSpiel solvers; 4 new tests
+  (15 total). Roadmap Week 4 complete; ES-MCCFR done early from Week 5.
 - **2026-06-12 (later)** — Week 4 part 1: implemented CFR+ (`agents/cfr_plus.py`) per
   Tammelin 2014 (paper filed as `Research_Papers/CFRplus_Tammelin2014.pdf`);
   `experiments/exp04_cfr_variants_kuhn.py` (4 figures + CSV: exploitability of avg+current

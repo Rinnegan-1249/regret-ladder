@@ -166,7 +166,34 @@ regret-ladder/
 
 ## 6. Status by Week
 
-### Week 4: CFR+ on Kuhn Poker (CFR+ done; OS-MCCFR pending)
+### Week 4 (part 2): MCCFR — outcome sampling and external sampling
+
+Implements both sampling schemes from Lanctot et al., NIPS 2009
+(`Research_Papers/MCCFR_Lanctot2009.pdf`), in `poker_ai/agents/mccfr_outcome.py`
+and `poker_ai/agents/mccfr_external.py`:
+
+- **Sampled counterfactual value** (Eq. 6): partition terminal histories into
+  blocks Q sampled with probability q; dividing each sampled utility by q(z)
+  makes the estimate unbiased (Lemma 1), so regret updates match CFR
+  **in expectation** while touching only a fraction of the tree per iteration.
+- **Outcome sampling (OS-MCCFR)**: each block is a single terminal history,
+  sampled with an epsilon-greedy profile at the update player's infosets
+  (`sigma' = eps*uniform + (1-eps)*sigma`, eps = 0.6 per the paper) and
+  on-policy elsewhere; epsilon keeps q(z) >= delta > 0, which appears as a
+  1/delta factor in the regret bound (Theorem 5).
+- **External sampling (ES-MCCFR)**: samples only the choices *external* to the
+  update player (chance and opponent); q(z) = pi_{-i}(z) cancels the
+  counterfactual weight exactly, giving the clean update r(I,a) += u(a) - u
+  (Eq. 11). Needs only a constant factor more iterations than vanilla CFR at
+  ~O(sqrt(|H|)) cost per iteration (Theorem 4) — an asymptotic win.
+
+The comparison experiment (`exp04b`) reproduces the paper's Figure-1-style
+plot: average-strategy exploitability vs **nodes touched** for vanilla CFR,
+CFR+, OS-MCCFR, and ES-MCCFR, plus per-iteration and per-second views.
+Validated against OpenSpiel's `OutcomeSamplingSolver` and
+`ExternalSamplingSolver` (`scripts/validate_week4b.py`).
+
+### Week 4 (part 1): CFR+ on Kuhn Poker
 
 Implements CFR+ from Tammelin 2014 (`Research_Papers/CFRplus_Tammelin2014.pdf`)
 in `poker_ai/agents/cfr_plus.py`. CFR+ changes three things vs vanilla CFR:
@@ -552,6 +579,25 @@ results/figures/week04_zero_regret_fraction.png
 results/figures/week04_current_strategy_trace.png
 ```
 
+### Run Week 4 MCCFR comparison (CFR vs CFR+ vs OS-MCCFR vs ES-MCCFR)
+
+```cmd
+:: 1) Validate our MCCFR solvers against OpenSpiel's
+python scripts\validate_week4b.py --os-iters 100000 --es-iters 20000
+
+:: 2) Four-way comparison (paper-style nodes-touched plot + per-iteration + per-second)
+python experiments\exp04b_mccfr_kuhn.py --iters 10000 --os-iters 200000 --es-iters 50000 --seeds 0 1 2
+```
+
+Outputs:
+
+```text
+results/tables/week04b_mccfr_comparison.csv
+results/figures/week04b_exploitability_vs_nodes.png
+results/figures/week04b_exploitability_vs_iterations.png
+results/figures/week04b_exploitability_vs_time.png
+```
+
 ### Observe one hand step-by-step
 
 ```cmd
@@ -589,19 +635,17 @@ This transcript shows the OpenSpiel functions being used: chance outcomes, legal
 - Track exploitability.
 - Validate against OpenSpiel's CFR solver.
 
-### Week 4: CFR+ and Outcome-Sampling MCCFR — CFR+ DONE, OS-MCCFR NEXT
-
-Plus: Hold'em terminology and groundwork for simplified Hold'em / abstraction later.
+### Week 4: CFR+ and Outcome-Sampling MCCFR — DONE
 
 - Implement CFR+. — DONE
-- Implement outcome-sampling MCCFR. — NEXT
-- Compare convergence curves. — CFR vs CFR+ done; add the OS-MCCFR curve.
+- Implement outcome-sampling MCCFR. — DONE
+- Compare convergence curves. — DONE (4-way overlay incl. ES-MCCFR, done early from Week 5)
 
-### Week 5: External-Sampling MCCFR and Leduc Poker
+### Week 5: External-Sampling MCCFR and Leduc Poker — ES-MCCFR DONE EARLY
 
-- Implement external-sampling MCCFR.
-- Refactor solvers to work beyond Kuhn.
-- Run Leduc Poker experiments.
+- Implement external-sampling MCCFR. — DONE (with Week 4)
+- Refactor solvers to work beyond Kuhn. — solvers already take any 2p pyspiel.Game
+- Run Leduc Poker experiments. — NEXT
 
 ### Week 6: Evaluation Suite and Visualizations
 

@@ -2,6 +2,20 @@
 
 Items Claude flags for human review land here. Check them off (or delete them) once handled.
 
+## From the 2026-06-12 session (Week 4 part 2: MCCFR)
+
+- [ ] **Review the three week04b figures** (`results/figures/week04b_*.png`) — the
+  nodes-touched overlay is the paper-style headline for the Week 4 deck's "three-curve
+  plot" requirement (we have four curves: CFR, CFR+, OS, ES).
+- [ ] **Deck takeaway to write up:** the variance-vs-computation trade-off — OS touches
+  ~10 nodes/iteration but needs many more iterations (1/delta factor in Theorem 5);
+  ES is the sweet spot on Kuhn (Theorem 4: constant-factor more iterations at sqrt
+  per-iteration cost); CFR+ still wins per full traversal. Note OS/ES used 3 seeds.
+- [ ] **Week 5 next:** Leduc Poker experiments — all four solvers already accept any
+  two-player pyspiel game, so exp05 is mostly a budget/runtime question.
+- [ ] **Optional:** epsilon sweep for OS-MCCFR (paper found 0.6 best across games;
+  could verify on Kuhn for the writeup).
+
 ## From the 2026-06-12 session (Week 4: CFR+)
 
 - [ ] **Review the four week04 figures** in `results/figures/` (exploitability vs
