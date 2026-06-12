@@ -26,6 +26,14 @@ app.mount("/papers", StaticFiles(directory=ROOT / "Research_Papers"), name="pape
 app.mount("/figures", StaticFiles(directory=ROOT / "results" / "figures"), name="figures")
 templates = Jinja2Templates(directory=WEB / "templates")
 
+# Cache-busting version for our own static assets: newest mtime under
+# web/static, computed at startup. Templates append ?v={{ v }} so browsers
+# always fetch fresh JS/CSS after a change without needing a hard refresh.
+_STATIC_VERSION = str(int(max(
+    p.stat().st_mtime for p in (WEB / "static").rglob("*") if p.is_file()
+)))
+templates.env.globals["v"] = _STATIC_VERSION
+
 
 # ---------- pages ----------
 

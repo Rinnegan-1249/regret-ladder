@@ -92,8 +92,10 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
         data.r2.push(Math.max(ev.p2_avg_regret, 1e-12));
         renderRps();
         setStatus(el("rps-train-status"), `Iteration ${ev.t.toLocaleString()} / ${T.toLocaleString()}`);
-      }, () => setStatus(el("rps-train-status"), "Done — strategies converged toward (1/3, 1/3, 1/3)."),
-         (err) => setStatus(el("rps-train-status"), err.message, true));
+      }, () => {
+        renderRps();
+        setStatus(el("rps-train-status"), "Done — strategies converged toward (1/3, 1/3, 1/3).");
+      }, (err) => setStatus(el("rps-train-status"), err.message, true));
     });
   }
 
@@ -179,8 +181,10 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
         renderKuhn();
         setStatus(el("kuhn-train-status"),
           `Iteration ${ev.t.toLocaleString()} / ${T.toLocaleString()} — exploitability ${ev.exploitability.toExponential(2)}`);
-      }, () => setStatus(el("kuhn-train-status"), "Done."),
-         (err) => setStatus(el("kuhn-train-status"), err.message, true));
+      }, () => {
+        renderKuhn();
+        setStatus(el("kuhn-train-status"), "Done.");
+      }, (err) => setStatus(el("kuhn-train-status"), err.message, true));
     });
   }
 })();
