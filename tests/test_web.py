@@ -14,6 +14,9 @@ client = TestClient(app)
 
 @pytest.mark.parametrize("path,marker", [
     ("/", "Regret Ladder"),
+    ("/games", "Kuhn"),
+    ("/foundations", "information sets"),
+    ("/regret", "Counterfactual"),
     ("/rps", "Rock"),
     ("/kuhn", "Kuhn"),
     ("/results", "Results"),

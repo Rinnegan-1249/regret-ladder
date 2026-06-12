@@ -42,15 +42,30 @@ def index(request: Request):
     return templates.TemplateResponse(request, "index.html", {"page": "home"})
 
 
+@app.get("/games", response_class=HTMLResponse)
+def games_page(request: Request):
+    return templates.TemplateResponse(request, "games.html", {"page": "games"})
+
+
+@app.get("/foundations", response_class=HTMLResponse)
+def foundations_page(request: Request):
+    return templates.TemplateResponse(request, "foundations.html", {"page": "foundations"})
+
+
+@app.get("/regret", response_class=HTMLResponse)
+def regret_page(request: Request):
+    return templates.TemplateResponse(request, "regret.html", {"page": "regret"})
+
+
 @app.get("/rps", response_class=HTMLResponse)
 def rps_page(request: Request):
-    return templates.TemplateResponse(request, "rps.html", {"page": "rps"})
+    return templates.TemplateResponse(request, "rps.html", {"page": "games"})
 
 
 @app.get("/kuhn", response_class=HTMLResponse)
 def kuhn_page(request: Request):
     return templates.TemplateResponse(
-        request, "kuhn.html", {"page": "kuhn", "bots": list_kuhn_bots()}
+        request, "kuhn.html", {"page": "games", "bots": list_kuhn_bots()}
     )
 
 

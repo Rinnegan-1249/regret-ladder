@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Foundations — Regret Ladder{% endblock %}
+{% block content %}
+
+<div class="hero" style="padding-top:1.6rem">
+  <div class="tagline">THE GAME MODEL</div>
+  <h1>Foundations: Extensive-Form Games</h1>
+  <p class="subtitle">The formal model everything on this site runs on — sequential decision-making with
+  imperfect information — following Osborne &amp; Rubinstein's definition as used by Zinkevich et al.
+  (2007) <a href="/references">[1]</a> and Lanctot et al. (2009) <a href="/references">[2]</a>.</p>
+</div>
+
+<h2><span class="secnum">01 /</span>Extensive games with imperfect information</h2>
+<p>
+  A <em>finite extensive game with imperfect information</em> consists of:
+</p>
+<ul>
+  <li>A finite set \(N\) of <strong>players</strong>, and a finite set \(H\) of <strong>histories</strong>
+    (sequences of actions, closed under prefixes). \(Z \subseteq H\) are the <strong>terminal
+    histories</strong>; \(A(h) = \{a : ha \in H\}\) are the actions available after non-terminal
+    \(h\).</li>
+  <li>A <strong>player function</strong> \(P(h) \in N \cup \{c\}\) naming who acts after \(h\) — possibly
+    <strong>chance</strong> \(c\), which acts with fixed known probabilities \(f_c(a|h)\) (the card deals
+    in poker).</li>
+  <li>For each player, a partition of their decision histories into <strong>information sets</strong>
+    \(I \in \mathcal{I}_i\): histories the player <em>cannot distinguish</em>, at which they must
+    therefore act with one distribution. In Kuhn Poker, "I hold the Queen and the opponent bet" is one
+    information set containing two histories — one where the opponent holds the Jack, one the King.</li>
+  <li><strong>Utilities</strong> \(u_i(z)\) at terminal histories. If \(N = \{1, 2\}\) and
+    \(u_1 = -u_2\) the game is <strong>zero-sum</strong>; \(\Delta_{u,i}\) denotes the utility range.</li>
+</ul>
+<div class="note">
+  <strong>Perfect recall.</strong> All algorithms here assume players never forget their own past
+  observations and actions: any two histories in the same information set share the player's own
+  action-observation sequence. This is what makes the prefix \(z[I]\) of a terminal history unique and
+  the counterfactual decomposition of the <a href="/regret">Regret</a> section sound — and it is an
+  explicit precondition of the MCCFR theorems.
+</div>
+
+<h2><span class="secnum">02 /</span>Strategies and reach probabilities</h2>
+<p>
+  A <strong>behavioral strategy</strong> \(\sigma_i\) assigns a distribution over \(A(I)\) to every
+  information set of player \(i\); a strategy profile \(\sigma\) collects one per player, and
+  \(\sigma_{-i}\) is everyone but \(i\). The <strong>reach probability</strong> of a history factors by
+  player:
+</p>
+<div class="eq">$$\pi^{\sigma}(h) \;=\; \prod_{i \in N \cup \{c\}} \pi^{\sigma}_i(h)
+  \;=\; \pi^{\sigma}_i(h)\,\pi^{\sigma}_{-i}(h),$$</div>
+<p>
+  where \(\pi^{\sigma}_i(h)\) is the product of player \(i\)'s own action probabilities along \(h\), and
+  \(\pi^{\sigma}_{-i}(h)\) collects everyone else's <em>including chance</em>. \(\pi^{\sigma}(h, z)\)
+  denotes the probability of completing \(h\) into \(z\). This factorization is the workhorse of the
+  whole site: counterfactual values weight by \(\pi^{\sigma}_{-i}\) (what the world does), average
+  strategies weight by \(\pi^{\sigma}_i\) (what the player does), and external-sampling MCCFR works
+  precisely because sampling the world makes \(q(z) = \pi^{\sigma}_{-i}(z)\) cancel.
+</p>
+
+<h2><span class="secnum">03 /</span>Equilibria, best response, exploitability</h2>
+<p>
+  A <strong>best response</strong> to \(\sigma_{-i}\) maximizes player \(i\)'s expected utility, with
+  value \(b_i(\sigma_{-i}) = \max_{\sigma'_i} u_i(\sigma'_i, \sigma_{-i})\). An
+  <strong>\(\varepsilon\)-Nash equilibrium</strong> is a profile where no player can gain more than
+  \(\varepsilon\) by deviating:
+</p>
+<div class="eq">$$\forall i \in N: \quad u_i(\sigma) + \varepsilon \;\ge\; \max_{\sigma'_i \in \Sigma_i} u_i(\sigma'_i, \sigma_{-i}).$$</div>
+<p>
+  In two-player zero-sum games, distance from equilibrium is measured by
+  <strong>exploitability</strong>:
+</p>
+<div class="eq">$$\epsilon_{\sigma} \;=\; b_1(\sigma_2) + b_2(\sigma_1),$$</div>
+<p>
+  the total amount a pair of best-responding adversaries would win against the profile — zero exactly at
+  Nash. Every convergence plot on this site has exploitability on its y-axis (computed with OpenSpiel's
+  best-response tooling); it is the honest metric because it asks "how badly could this strategy be
+  beaten?", not "how well did it do against one opponent?".
+</p>
+
+<h2><span class="secnum">04 /</span>The two games on the ladder</h2>
+<table class="tbl">
+  <tr><th></th><th>Rock–Paper–Scissors</th><th>Kuhn Poker</th></tr>
+  <tr><td>Form</td><td>normal-form (one simultaneous move)</td><td>extensive-form, sequential betting</td></tr>
+  <tr><td>Hidden information</td><td>simultaneity only</td><td>private cards (chance)</td></tr>
+  <tr><td>Information sets</td><td>1 per player</td><td>6 per player</td></tr>
+  <tr><td>Game-tree nodes</td><td>—</td><td>58</td></tr>
+  <tr><td>Nash equilibrium</td><td>unique: (1/3, 1/3, 1/3)</td><td>one-parameter family, requires bluffing</td></tr>
+  <tr><td>Game value (P1)</td><td>0</td><td>−1/18 chips/hand</td></tr>
+  <tr><td>Solver needed</td><td>regret matching</td><td>CFR family</td></tr>
+</table>
+<p>
+  A normal-form game is just an extensive game with a single information set per player — which is why
+  regret matching on RPS is the exact special case of CFR, and why the <a href="/regret">Regret</a>
+  section can develop both with one set of tools.
+</p>
+
+{% endblock %}
