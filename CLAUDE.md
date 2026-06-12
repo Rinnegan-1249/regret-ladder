@@ -99,8 +99,14 @@ graphs, theory/results/references pages. Key modules: `web/bots.py` (policy trai
 JSON cache in gitignored `web/cache/`), `web/rps_engine.py` & `web/kuhn_engine.py`
 (in-memory match stores), `web/training_stream.py` (SSE generators with hard iteration
 caps), templates+vanilla JS with Plotly/KaTeX CDN. Tests in `tests/test_web.py` use a
-`fast_cfr_bots` fixture (tiny budgets, tmp cache). Gotcha: PowerShell mangles double
-quotes in inline `python -c` here-strings — use single quotes/percent-formatting.
+`fast_cfr_bots` fixture (tiny budgets, tmp cache). Gotchas: (1) PowerShell mangles
+double quotes in inline `python -c` here-strings — use single quotes/percent-
+formatting. (2) `Plotly.react` compares trace arrays BY REFERENCE — arrays mutated in
+place with push() are treated as unchanged and never redraw; always pass `.slice()`
+copies. (3) To debug client-side chart issues empirically: headless Chrome screenshot
+of `web/static/debug_charts.html` (auto-runs both training streams through the real JS)
+via `chrome --headless=new --screenshot=... --virtual-time-budget=25000 <url>`, then
+Read the PNG.
 
 ## Progress log
 
