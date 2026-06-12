@@ -3,12 +3,14 @@ import pandas as pd
 import argparse
 from pathlib import Path
 
+import pyspiel
+
 from poker_ai.agents.always_call import AlwaysCallAgent
 from poker_ai.agents.always_fold import AlwaysFoldAgent
 from poker_ai.agents.ev_heuristic import EVHeuristicAgent
 from poker_ai.agents.random_agent import RandomAgent
 from poker_ai.agents.rule_based import RuleBasedAgent
-from poker_ai.evaluation.tournament import round_robin
+from poker_ai.evaluation.tournament import run_round_robin
 from poker_ai.utils.seeding import seed_everything
 
 
@@ -29,20 +31,22 @@ def main() -> None:
     parser.add_argument("--out", default="results/tables/exp01_baseline_tournament.csv")
     args = parser.parse_args()
 
+    game = pyspiel.load_game(args.game)
     all_dfs = []
 
     for seed in args.seeds:
         seed_everything(seed)
 
-        agents = build_agents(seed=seed)
+        agents = list(build_agents(seed=seed).values())
 
-        df_seed = round_robin(
-            game_name=args.game,
-            agents=agents,
+        _matrix, df_seed = run_round_robin(
+            game,
+            agents,
             n_pairs=args.n_pairs,
             seeds=[seed],
         )
 
+        df_seed.insert(0, "game", args.game)
         all_dfs.append(df_seed)
 
     df = pd.concat(all_dfs, ignore_index=True)
