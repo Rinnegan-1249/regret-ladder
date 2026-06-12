@@ -3,14 +3,10 @@
 {% block content %}
 
 <div class="hero-xl">
-  <div class="bg-text" aria-hidden="true">
-    <span>Regret Minimization</span>
-    <span>&times;</span>
-    <span>Sequential Games</span>
-  </div>
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
   <div class="fg">
     <h1>Regret <span class="accent">Ladder</span></h1>
-    <div class="sub">From regret matching to counterfactual regret</div>
+    <div class="sub">Games &times; Regret Learning</div>
   </div>
   <a class="scroll-cue" href="#about">scroll &darr;</a>
 </div>
@@ -72,4 +68,7 @@
   </a>
 </div>
 
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/hero.js?v={{ v }}"></script>
 {% endblock %}

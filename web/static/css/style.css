@@ -384,21 +384,9 @@ button.pact.passv:hover { background: rgba(248,113,113,0.1); box-shadow: 0 0 18p
   text-align: center;
   overflow: hidden;
 }
-.hero-xl .bg-text {
+.hero-xl canvas {
   position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1.2vw;
-  font-family: var(--font-display); font-weight: 700;
-  font-size: 7.2vw; line-height: 1.05; letter-spacing: 0.06em;
-  text-transform: uppercase; white-space: nowrap;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.06);
-  user-select: none; pointer-events: none;
-  animation: bgdrift 14s ease-in-out infinite alternate;
-}
-@keyframes bgdrift {
-  from { transform: translateY(-1.2%) scale(1); opacity: 0.9; }
-  to   { transform: translateY(1.2%) scale(1.025); opacity: 1; }
+  pointer-events: none;
 }
 .hero-xl .fg { position: relative; z-index: 1; animation: fadeup 0.8s ease; }
 .hero-xl h1 {
