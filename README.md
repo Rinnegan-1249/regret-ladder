@@ -166,6 +166,34 @@ regret-ladder/
 
 ## 6. Status by Week
 
+### Week 4: CFR+ on Kuhn Poker (CFR+ done; OS-MCCFR pending)
+
+Implements CFR+ from Tammelin 2014 (`Research_Papers/CFRplus_Tammelin2014.pdf`)
+in `poker_ai/agents/cfr_plus.py`. CFR+ changes three things vs vanilla CFR:
+
+1. **Regret-matching+**: cumulative regrets are floored at zero after every
+   update, `R+[I][a] <- max(R+[I][a] + (v(a) - v), 0)`, so the next strategy is
+   directly proportional to the stored (non-negative) regrets.
+2. **Alternating updates**: each iteration runs one pass per player; the pass
+   for player i updates only i's regrets and accumulates the opponent's
+   average-strategy contribution.
+3. **Linear weighted averaging**: strategy contributions on iteration t are
+   weighted by `w_t = max(t - d, 0)` (delay `d = 0` by default).
+
+Headline results on Kuhn at 10,000 iterations (exp04):
+
+| Metric | CFR | CFR+ |
+|---|---:|---:|
+| Average-strategy exploitability | 2.3e-03 | 9.1e-06 (**~255x better**) |
+| Current-strategy exploitability | 1.5e-01 (oscillates) | 8.5e-03 (decays) |
+| Game value (player 0) | — | -0.055556 = -1/18 exactly |
+
+The recovered CFR+ average strategy lands exactly in the Kuhn Nash family:
+alpha = P(bet|J) = 0.2226, P(bet|Q) = 0, P(bet|K) = 0.6678 = 3*alpha.
+Validated against OpenSpiel's `CFRPlusSolver` (`scripts/validate_week4.py`).
+Also reproduced the paper's compressibility claim: a large fraction of CFR+
+regret entries stay exactly zero, while CFR accumulates negative regret.
+
 ### Week 2: Regret Matching on Rock-Paper-Scissors
 
 - `RegretMatchingAgent` with two update rules:
@@ -503,6 +531,27 @@ results/tables/week03_pairwise_with_ci.csv
 results/figures/week03_payoff_matrix.png
 ```
 
+### Run Week 4 CFR vs CFR+ comparison
+
+```cmd
+:: 1) Validate our CFR+ against OpenSpiel's CFRPlusSolver
+python scripts\validate_week4.py --game kuhn_poker --iters 1000
+
+:: 2) Full comparison: exploitability (avg + current), per-second curves,
+::    zero-regret fraction, current-strategy Nash convergence
+python experiments\exp04_cfr_variants_kuhn.py --game kuhn_poker --iters 10000 --delay 0
+```
+
+Outputs:
+
+```text
+results/tables/week04_cfr_vs_cfrplus.csv
+results/figures/week04_exploitability_vs_iterations.png
+results/figures/week04_exploitability_vs_time.png
+results/figures/week04_zero_regret_fraction.png
+results/figures/week04_current_strategy_trace.png
+```
+
 ### Observe one hand step-by-step
 
 ```cmd
@@ -540,13 +589,13 @@ This transcript shows the OpenSpiel functions being used: chance outcomes, legal
 - Track exploitability.
 - Validate against OpenSpiel's CFR solver.
 
-### Week 4: CFR+ and Outcome-Sampling MCCFR — NEXT
+### Week 4: CFR+ and Outcome-Sampling MCCFR — CFR+ DONE, OS-MCCFR NEXT
 
 Plus: Hold'em terminology and groundwork for simplified Hold'em / abstraction later.
 
-- Implement CFR+.
-- Implement outcome-sampling MCCFR.
-- Compare convergence curves.
+- Implement CFR+. — DONE
+- Implement outcome-sampling MCCFR. — NEXT
+- Compare convergence curves. — CFR vs CFR+ done; add the OS-MCCFR curve.
 
 ### Week 5: External-Sampling MCCFR and Leduc Poker
 

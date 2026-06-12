@@ -2,6 +2,22 @@
 
 Items Claude flags for human review land here. Check them off (or delete them) once handled.
 
+## From the 2026-06-12 session (Week 4: CFR+)
+
+- [ ] **Review the four week04 figures** in `results/figures/` (exploitability vs
+  iterations / vs time, zero-regret fraction, current-strategy trace) — these are the
+  candidates for the roadmap's 7-slide Week 4 deck.
+- [ ] **Prepare the Week 4 deck** (roadmap deliverable): CFR+ update rule
+  (regret-matching+ formula), linear averaging math, the headline 4-curve plot, and the
+  takeaway table (CFR+ avg 9.1e-06 vs CFR 2.3e-03 at 10k iters; current strategy
+  converges for CFR+, oscillates for CFR; recovered Nash family alpha = 0.2226 with
+  P(bet|K) = 3*alpha exactly).
+- [ ] **OS-MCCFR is still pending** — the roadmap's Week 4 pairs CFR+ with
+  outcome-sampling MCCFR. exp04 is built so a third curve can be added.
+- [ ] **Optional:** decide whether to run a delay sweep (`--delay 100/500`) to reproduce
+  the paper's Figure-2-style "averaging delay" effect for the writeup. On Kuhn the effect
+  is likely small; on Leduc (Week 5) it may be more visible.
+
 ## From the 2026-06-12 session (cleanup + RPS expected-utility change)
 
 - [ ] **Update the Week 2 report/slides math writeup.** The RPS experiment now uses

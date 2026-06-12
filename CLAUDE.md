@@ -26,7 +26,14 @@ Week 1: baselines on Kuhn Poker → Week 2: regret matching on RPS → Week 3: V
 on Kuhn → Week 4+: CFR+, MCCFR (outcome/external sampling), Leduc Poker, Hold'em
 terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of scope.
 
-## Current status: Weeks 1–3 implemented
+## Current status: Weeks 1–3 done; Week 4 CFR+ done (OS-MCCFR pending)
+
+- **Week 4 (partial):** `CFRPlus` in `poker_ai/agents/cfr_plus.py` (Tammelin 2014:
+  regret-matching+ floor, alternating updates, linear weighted averaging with delay d).
+  Validated vs OpenSpiel `CFRPlusSolver`. exp04 results: CFR+ avg-strategy exploitability
+  9.1e-06 vs CFR 2.3e-03 at 10k iters; CFR+ current strategy converges (8.5e-03, decaying)
+  while CFR current oscillates (~1.5e-01); recovered exact Kuhn Nash family member
+  (alpha=0.2226, bet K = 3*alpha). OS-MCCFR still needed to complete roadmap Week 4.
 
 - **Week 1:** 5 baseline agents (random, always_call, always_fold, rule_based,
   ev_heuristic), duplicate-pair evaluation, multi-seed round-robin tournament on Kuhn.
@@ -42,7 +49,7 @@ terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of sco
 ## Layout (see docs/repo_structure.md for detail)
 
 - `poker_ai/` — installed package (`pip install -e .`), all reusable code:
-  `agents/` (baselines, `regret_matching.py`, `cfr.py`, `openspiel_solver.py`),
+  `agents/` (baselines, `regret_matching.py`, `cfr.py`, `cfr_plus.py`, `openspiel_solver.py`),
   `env/rps.py`, `evaluation/` (`tournament.py`, `exploitability.py`, `stats.py`),
   `utils/seeding.py`.
 - `experiments/` — weekly deliverables (exp01=W1, exp02=W2, exp03=W3). Run from repo root.
@@ -60,6 +67,8 @@ python experiments\exp02_rps_convergence.py --seed 0 --iterations 100000   (repe
 python experiments\exp03_train_cfr.py --game kuhn_poker --iters 10000
 python experiments\exp03_week3_tournament.py --game kuhn_poker --cfr-iters 10000 --n-pairs 10000 --seeds 0 1 2 3 4
 python scripts\validate_week3.py --game kuhn_poker --iters 1000
+python experiments\exp04_cfr_variants_kuhn.py --game kuhn_poker --iters 10000 --delay 0
+python scripts\validate_week4.py --game kuhn_poker --iters 1000
 ```
 
 All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--out-dir`)
@@ -79,6 +88,12 @@ All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--o
 
 ## Progress log
 
+- **2026-06-12 (later)** — Week 4 part 1: implemented CFR+ (`agents/cfr_plus.py`) per
+  Tammelin 2014 (paper filed as `Research_Papers/CFRplus_Tammelin2014.pdf`);
+  `experiments/exp04_cfr_variants_kuhn.py` (4 figures + CSV: exploitability of avg+current
+  strategies vs iterations and vs wall-clock, zero-regret compressibility, current-strategy
+  Nash-family trace); `scripts/validate_week4.py` vs OpenSpiel CFRPlusSolver; 3 new tests
+  (11 total). OS-MCCFR remains for Week 4 completion.
 - **2026-06-12** — Repo audit + cleanup (docs, .gitignore dedupe, archived week3
   README/requirements, README overhaul, 3 new tests). Switched exp02 RPS to
   expected-utility regret updates and regenerated all Week 2 results (seeds 0–4).
