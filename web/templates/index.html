@@ -2,15 +2,20 @@
 {% block title %}Regret Ladder — regret minimization in games{% endblock %}
 {% block content %}
 
-<div class="hero">
-  <div class="tagline">REGRET MINIMIZATION &times; COUNTERFACTUAL REASONING</div>
-  <h1>Regret <span class="accent">Ladder</span></h1>
-  <p class="subtitle">An interactive companion to a summer research project on regret minimization and
-  counterfactual regret minimization (CFR) in games — play the bots, watch the algorithms learn,
-  read the math.</p>
+<div class="hero-xl">
+  <div class="bg-text" aria-hidden="true">
+    <span>Regret Minimization</span>
+    <span>&times;</span>
+    <span>Sequential Games</span>
+  </div>
+  <div class="fg">
+    <h1>Regret <span class="accent">Ladder</span></h1>
+    <div class="sub">From regret matching to counterfactual regret</div>
+  </div>
+  <a class="scroll-cue" href="#about">scroll &darr;</a>
 </div>
 
-<div class="card">
+<div class="card" id="about">
   <h3 style="margin-top:0"><span class="secnum">01 /</span>What this site is</h3>
   <p>
     This project builds a <em>ladder</em> of increasingly capable game-solving algorithms — starting from
