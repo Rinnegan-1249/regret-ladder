@@ -6,6 +6,7 @@ event. Hard iteration caps are enforced here.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 
 import numpy as np
@@ -36,10 +37,10 @@ def _checkpoints(iterations: int) -> set[int]:
     return set(int(p) for p in pts)
 
 
-def rps_stream(iterations: int, seed: int):
+async def rps_stream(iterations: int, seed: int):
     """Expected-update RM self-play (the exp02 setup), streamed."""
     iterations = max(1, min(int(iterations), RPS_MAX_ITERS))
-    pts = _checkpoints(iterations)
+    pts = sorted(_checkpoints(iterations))
 
     p1 = RegretMatchingAgent(num_actions=3, seed=seed)
     p2 = RegretMatchingAgent(num_actions=3, seed=seed + 10_000)
@@ -49,20 +50,26 @@ def rps_stream(iterations: int, seed: int):
     p2.regret_sum[:] = p2.rng.uniform(0.0, 1.0, size=3)
 
     yield _sse({"type": "start", "iterations": iterations, "seed": seed})
-    for t in range(1, iterations + 1):
-        s1 = p1.current_strategy()
-        s2 = p2.current_strategy()
-        p1.update_expected(s1, PAYOFF_MATRIX @ s2)
-        p2.update_expected(s2, PAYOFF_MATRIX @ s1)
-        if t in pts:
-            yield _sse({
-                "type": "checkpoint",
-                "t": t,
-                "p1_avg": [float(x) for x in p1.average_strategy()],
-                "p2_avg": [float(x) for x in p2.average_strategy()],
-                "p1_avg_regret": p1.average_regret(),
-                "p2_avg_regret": p2.average_regret(),
-            })
+    loop = asyncio.get_running_loop()
+    t = 0
+    for checkpoint in pts:
+        def _run(p1=p1, p2=p2, t0=t, t1=checkpoint):
+            for _ in range(t0 + 1, t1 + 1):
+                s1 = p1.current_strategy()
+                s2 = p2.current_strategy()
+                p1.update_expected(s1, PAYOFF_MATRIX @ s2)
+                p2.update_expected(s2, PAYOFF_MATRIX @ s1)
+        await loop.run_in_executor(None, _run)
+        t = checkpoint
+        yield _sse({
+            "type": "checkpoint",
+            "t": t,
+            "p1_avg": [float(x) for x in p1.average_strategy()],
+            "p2_avg": [float(x) for x in p2.average_strategy()],
+            "p1_avg_regret": p1.average_regret(),
+            "p2_avg_regret": p2.average_regret(),
+        })
+        await asyncio.sleep(0)
     yield _sse({"type": "done"})
 
 
@@ -101,7 +108,7 @@ def _avg_bet_probs(solver) -> dict[str, dict[str, float]]:
     return out
 
 
-def kuhn_stream(algo: str, iterations: int, seed: int):
+async def kuhn_stream(algo: str, iterations: int, seed: int):
     """Train the chosen solver, streaming average-strategy bet probabilities
     per infoset and exploitability at checkpoints."""
     if algo not in KUHN_ALGOS:
@@ -109,20 +116,26 @@ def kuhn_stream(algo: str, iterations: int, seed: int):
         return
     label, cap, _takes_seed = KUHN_ALGOS[algo]
     iterations = max(1, min(int(iterations), cap))
-    pts = _checkpoints(iterations)
+    pts = sorted(_checkpoints(iterations))
 
     game = pyspiel.load_game("kuhn_poker")
     solver = _make_kuhn_solver(algo, game, seed)
 
     yield _sse({"type": "start", "algo": algo, "label": label,
                 "iterations": iterations, "seed": seed})
-    for t in range(1, iterations + 1):
-        solver.step()
-        if t in pts:
-            yield _sse({
-                "type": "checkpoint",
-                "t": t,
-                "exploitability": compute_exploitability(game, solver.average_policy()),
-                "bet_probs": _avg_bet_probs(solver),
-            })
+    loop = asyncio.get_running_loop()
+    t = 0
+    for checkpoint in pts:
+        def _run(solver=solver, t0=t, t1=checkpoint):
+            for _ in range(t1 - t0):
+                solver.step()
+        await loop.run_in_executor(None, _run)
+        t = checkpoint
+        yield _sse({
+            "type": "checkpoint",
+            "t": t,
+            "exploitability": compute_exploitability(game, solver.average_policy()),
+            "bet_probs": _avg_bet_probs(solver),
+        })
+        await asyncio.sleep(0)
     yield _sse({"type": "done"})

@@ -5,6 +5,10 @@ Run from the repo root:
 """
 from __future__ import annotations
 
+import asyncio
+import logging
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -20,7 +24,36 @@ from web.rps_engine import SeatSpec
 ROOT = Path(__file__).resolve().parent.parent
 WEB = Path(__file__).resolve().parent
 
-app = FastAPI(title="Regret Ladder")
+_log = logging.getLogger("regret_ladder.prewarm")
+_PREWARM_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bot-prewarm")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    loop = asyncio.get_running_loop()
+
+    async def _prewarm():
+        from web.bots import KUHN_CFR_BOTS, get_kuhn_policy_table, get_rps_frozen_strategy
+        _log.info("Pre-warming bot caches...")
+        try:
+            await loop.run_in_executor(_PREWARM_EXECUTOR, get_rps_frozen_strategy)
+            _log.info("RPS bot ready.")
+        except Exception as e:
+            _log.error("RPS pre-warm failed: %s", e)
+        for bot_id in KUHN_CFR_BOTS:
+            try:
+                await loop.run_in_executor(_PREWARM_EXECUTOR, get_kuhn_policy_table, bot_id)
+                _log.info("Kuhn bot '%s' ready.", bot_id)
+            except Exception as e:
+                _log.error("Kuhn bot '%s' pre-warm failed: %s", bot_id, e)
+        _log.info("All bots pre-warmed.")
+
+    asyncio.create_task(_prewarm())
+    yield
+    _PREWARM_EXECUTOR.shutdown(wait=False)
+
+
+app = FastAPI(title="Regret Ladder", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=WEB / "static"), name="static")
 app.mount("/papers", StaticFiles(directory=ROOT / "Research_Papers"), name="papers")
 app.mount("/figures", StaticFiles(directory=ROOT / "results" / "figures"), name="figures")
