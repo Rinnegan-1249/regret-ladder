@@ -1,0 +1,18 @@
+# Dependencies for the web app deployment (Render / production).
+# Excludes research-only packages (jupyter, pytest, matplotlib-heavy pipelines).
+
+# Scientific deps used by poker_ai modules the web imports
+numpy
+scipy
+pandas
+matplotlib
+tqdm
+
+# OpenSpiel (supplies pyspiel Python bindings + open_spiel.python)
+open-spiel
+
+# Web framework
+fastapi
+uvicorn[standard]
+jinja2
+httpx
