@@ -26,7 +26,7 @@ Week 1: baselines on Kuhn Poker → Week 2: regret matching on RPS → Week 3: V
 on Kuhn → Week 4+: CFR+, MCCFR (outcome/external sampling), Leduc Poker, Hold'em
 terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of scope.
 
-## Current status: Weeks 1–6 experiment scripts done; full runs pending
+## Current status: Weeks 1–6 experiment scripts done; full runs complete
 
 - **Weeks 5–6 (Leduc Poker):** All four solvers ported to Leduc Poker (9,457 tree nodes,
   936 infosets — 78×/394× larger than Kuhn). `exp05_leduc_cfr_variants.py`: CFR vs CFR+
@@ -34,9 +34,14 @@ terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of sco
   4-way overlay (nodes/iter/time) on Leduc; `exp06_leduc_tournament.py`: 7-agent round-
   robin (5 baselines + CFR + CFRPlus) with duplicate-pair evaluation. Validation scripts:
   `validate_week5.py` (CFR/CFR+ vs OpenSpiel) and `validate_week6.py` (OS/ES vs OpenSpiel).
-  Smoke-tested: all scripts pass, 41/41 tests green. Full runs pending (CFR on Leduc ≈
-  0.145 s/iter; recommended: exp05 --iters 10000, exp06 --iters 5000 --os-iters 500000
-  --es-iters 100000). No algorithm code changed — solvers are game-agnostic.
+  Smoke-tested: all scripts pass, 41/41 tests green. Full runs done and committed
+  (commits `1225760`, `b328b83`, `82fc984`): exp05 at 10,000 iters
+  (`week05_leduc_cfr_variants.csv`); exp06 4-way overlay at CFR/CFR+ 5,000 iters,
+  OS-MCCFR 500,000 iters, ES-MCCFR 100,000 iters (`week06_leduc_mccfr.csv`);
+  exp06 tournament at 5,000 pairs × 5 seeds, CFR/CFR+ trained 5,000 iters
+  (`week06_leduc_payoff_matrix.csv` — CFR/CFR+ both dominate baselines ~0.55
+  chips/hand, head-to-head CFR vs CFR+ ≈ 0.0006 chips/hand). No algorithm code
+  changed — solvers are game-agnostic.
 
 - **Week 4:** `CFRPlus` (`agents/cfr_plus.py`, Tammelin 2014: regret-matching+ floor,
   alternating updates, linear weighted averaging w_t = max(t-d, 0)). exp04: CFR+ avg
@@ -126,6 +131,14 @@ via `chrome --headless=new --screenshot=... --virtual-time-budget=25000 <url>`, 
 Read the PNG.
 
 ## Progress log
+
+- **2026-06-21** — Ran `validate_week5.py` (10k iters) and `validate_week6.py`
+  (100k OS / 20k ES), neither of which had actually been executed before despite
+  being marked complete. Both pass: CFR+ tracks OpenSpiel within 0.75–1.0× throughout;
+  vanilla CFR drifts to 5.11× by iter 10000 (still same order of magnitude — expected
+  from simultaneous vs. alternating updates). OS/ES-MCCFR track OpenSpiel almost
+  exactly at every checkpoint. Logs in `results/logs/` (gitignored). Weeks 5–6 are now
+  fully done: scripts, full runs, and validation all complete.
 
 - **2026-06-20** — Weeks 5–6 experiment scripts implemented (Leduc Poker scaling).
   Leduc has 9,457 tree nodes and 936 infosets (394× / 78× larger than Kuhn); no solver

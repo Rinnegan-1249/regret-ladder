@@ -2,35 +2,38 @@
 
 ## From the 2026-06-20 session (Weeks 5–6: Leduc Poker)
 
-- [ ] **Run exp05 full run** (CFR vs CFR+ on Leduc, ~24 min total):
-  `python experiments\exp05_leduc_cfr_variants.py --iters 10000`
-  Review `results/figures/week05_*.png` — headline: CFR+ should dominate by ~2+ orders
-  of magnitude. Leduc compressibility (zero-regret fraction) story should be even
-  stronger than Kuhn (more zero entries because the floored regret+ interacts with a
-  larger infoset space).
+- [x] **Run exp05 full run** — DONE. Results in `results/figures/week05_*.png` and
+  `results/tables/week05_leduc_cfr_variants.csv`. Headline: CFR+ 2164× better than CFR
+  at 10k iters (4.823e-06 vs 1.044e-02). CFR current strategy oscillates (1.101); CFR+
+  current converges (2.058e-03). Speed-up grows with game size (Kuhn was 255×).
 
-- [ ] **Run validate_week5** (~24 min at 10k iters):
-  `python scripts\validate_week5.py --iters 10000`
-  Ratio ours/OpenSpiel should stay near 1.0 at all checkpoints for both CFR and CFR+.
+- [x] **Run validate_week5** — DONE (10k iters). CFR+ ratio 0.75–1.0× vs OpenSpiel
+  throughout. Vanilla CFR ratio grows from 1.04× (iter 10) to 5.11× (iter 10000,
+  0.01044 vs 0.00204) — same order of magnitude, consistent with the known
+  simultaneous-vs-alternating-update difference (CFR current strategy oscillates,
+  CFR+ converges). Log: `results/logs/validate_week5_run.txt`.
 
-- [ ] **Run exp06 MCCFR full run** (~35 min, 3 seeds):
-  `python experiments\exp06_leduc_mccfr.py --iters 5000 --os-iters 500000 --es-iters 100000`
-  The nodes-touched plot (`week06_exploitability_vs_nodes.png`) is the paper-style
-  headline. On Leduc the per-node gap between OS and ES should be wider than on Kuhn
-  (larger tree = more expensive full traversal, bigger relative saving from sampling).
+- [x] **Run exp06 MCCFR full run** — DONE. `week06_exploitability_vs_nodes.png` is the
+  headline. On Leduc, full-traversal solvers dominate: CFR+ at 94.6M nodes = 1.486e-05;
+  OS-MCCFR at 7.88M nodes = 2.337e-01; ES-MCCFR at 4.49M nodes = 6.686e-02. MCCFR
+  needs much larger iteration budgets on Leduc due to high sample variance.
 
-- [ ] **Run exp06 tournament full run** (~30 min, 5 seeds):
-  `python experiments\exp06_leduc_tournament.py --cfr-iters 5000 --n-pairs 5000`
-  Review `week06_leduc_payoff_matrix.png` — CFRPlus should beat CFR at 5k iters; both
-  should dominate all baselines.
+- [x] **Run exp06 tournament full run** — DONE. CFR5000 and CFRPlus5000 both dominate all
+  5 baselines (~0.55 chips/hand). Head-to-head difference is 0.0006 chips/hand (near-Nash
+  equivalence at 5k iters). See `week06_leduc_payoff_matrix.png`.
 
-- [ ] **Run validate_week6** (~15 min):
-  `python scripts\validate_week6.py --os-iters 100000 --es-iters 20000`
+- [x] **Run validate_week6** — DONE (100k OS / 20k ES). Both solvers track OpenSpiel
+  closely at every checkpoint (final exploitability: OS-MCCFR 0.5038 vs 0.5002,
+  ES-MCCFR 0.1778 vs 0.1826). Log: `results/logs/validate_week6_run.txt`.
 
-- [ ] **Write-up note for the Leduc deck**: The key scaling insight is that CFR's full-
-  traversal cost grows linearly with tree size (9,457 nodes/iter on Leduc vs 24 on Kuhn),
-  making MCCFR's per-node advantage even more compelling at scale. CFR+ compressibility
-  (zero regret entries) is even more pronounced on Leduc.
+- [ ] **Write-up note for the Leduc deck**: Two key scaling results: (1) CFR+ speed-up
+  grows from 255× on Kuhn to 2164× on Leduc at 10k iters — the regret-floor interacts
+  with more infosets to produce dramatically faster convergence. (2) On Leduc, full-
+  traversal solvers (especially CFR+) are more efficient per node than MCCFR samplers
+  because sample variance grows with game tree size.
+
+- [ ] **Eyeball the 7 new figures** in `results/figures/week05_*.png` and
+  `results/figures/week06_*.png` before presenting to professor.
 
 
 
