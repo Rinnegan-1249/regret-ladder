@@ -132,6 +132,14 @@ Read the PNG.
 
 ## Progress log
 
+- **2026-06-21 (later)** — Wrote `reports/Final_Report.md`: consolidated Week 1–6
+  write-up (Week 7 deliverable) covering every implemented agent/solver, all key
+  numeric results pulled directly from `results/tables/*.csv` (baseline tournament,
+  RPS regret-matching convergence, Vanilla CFR vs OpenSpiel, CFR+/MCCFR on Kuhn,
+  CFR/CFR+/MCCFR scaling to Leduc, head-to-head significance tests, and the
+  validate_week5/6 ratios from the prior session). Draft — flagged in REMINDERS.md
+  for review; a presentation/deck still needs to be prepared separately.
+
 - **2026-06-21** — Ran `validate_week5.py` (10k iters) and `validate_week6.py`
   (100k OS / 20k ES), neither of which had actually been executed before despite
   being marked complete. Both pass: CFR+ tracks OpenSpiel within 0.75–1.0× throughout;

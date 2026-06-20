@@ -1,5 +1,15 @@
 # Reminders — things to review manually
 
+## From the 2026-06-21 session (Week 7: Final Report)
+
+- [ ] **Review `reports/Final_Report.md`** — generated draft covering Weeks 1–6 with
+  all key numeric results (baseline tournament, RPS convergence, Vanilla CFR vs
+  OpenSpiel, CFR+/MCCFR on Kuhn, CFR/CFR+/MCCFR on Leduc, validation ratios). Check it
+  reads well for the professor and that no numbers look off before treating it as final.
+- [ ] **Decide on a presentation/slide deck** to accompany the final report — the
+  roadmap's Week 7 also calls for "prepare final report and presentation"; only the
+  written report has been generated so far.
+
 ## From the 2026-06-20 session (Weeks 5–6: Leduc Poker)
 
 - [x] **Run exp05 full run** — DONE. Results in `results/figures/week05_*.png` and
