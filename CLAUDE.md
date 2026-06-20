@@ -26,7 +26,17 @@ Week 1: baselines on Kuhn Poker → Week 2: regret matching on RPS → Week 3: V
 on Kuhn → Week 4+: CFR+, MCCFR (outcome/external sampling), Leduc Poker, Hold'em
 terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of scope.
 
-## Current status: Weeks 1–4 done (+ ES-MCCFR from Week 5); next: Leduc
+## Current status: Weeks 1–6 experiment scripts done; full runs pending
+
+- **Weeks 5–6 (Leduc Poker):** All four solvers ported to Leduc Poker (9,457 tree nodes,
+  936 infosets — 78×/394× larger than Kuhn). `exp05_leduc_cfr_variants.py`: CFR vs CFR+
+  convergence + compressibility on Leduc (3 figures + CSV); `exp06_leduc_mccfr.py`:
+  4-way overlay (nodes/iter/time) on Leduc; `exp06_leduc_tournament.py`: 7-agent round-
+  robin (5 baselines + CFR + CFRPlus) with duplicate-pair evaluation. Validation scripts:
+  `validate_week5.py` (CFR/CFR+ vs OpenSpiel) and `validate_week6.py` (OS/ES vs OpenSpiel).
+  Smoke-tested: all scripts pass, 41/41 tests green. Full runs pending (CFR on Leduc ≈
+  0.145 s/iter; recommended: exp05 --iters 10000, exp06 --iters 5000 --os-iters 500000
+  --es-iters 100000). No algorithm code changed — solvers are game-agnostic.
 
 - **Week 4:** `CFRPlus` (`agents/cfr_plus.py`, Tammelin 2014: regret-matching+ floor,
   alternating updates, linear weighted averaging w_t = max(t-d, 0)). exp04: CFR+ avg
@@ -56,9 +66,11 @@ terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of sco
   `agents/` (baselines, `regret_matching.py`, `cfr.py`, `cfr_plus.py`, `openspiel_solver.py`),
   `env/rps.py`, `evaluation/` (`tournament.py`, `exploitability.py`, `stats.py`),
   `utils/seeding.py`.
-- `experiments/` — weekly deliverables (exp01=W1, exp02=W2, exp03=W3). Run from repo root.
-- `scripts/` — demos, human-play, report generators, `validate_week3.py`.
-- `tests/` — pytest sanity tests (8 passing as of 2026-06-12).
+- `experiments/` — weekly deliverables (exp01=W1, exp02=W2, exp03=W3, exp04/04b=W4,
+  exp05=W5, exp06×2=W6). Run from repo root.
+- `scripts/` — demos, human-play, report generators, `validate_week3/4/4b/5/6.py`.
+- `tests/` — pytest sanity tests (41 passing as of 2026-06-20; `test_leduc_smoke.py` covers
+  all 4 solvers on Leduc).
 - `docs/` — roadmap PDF, `repo_audit_before_cleanup.md`, `repo_structure.md`.
 - `archive/legacy_before_cleanup/` — superseded files, never delete things, archive them.
 
@@ -75,6 +87,11 @@ python experiments\exp04_cfr_variants_kuhn.py --game kuhn_poker --iters 10000 --
 python scripts\validate_week4.py --game kuhn_poker --iters 1000
 python experiments\exp04b_mccfr_kuhn.py --iters 10000 --os-iters 200000 --es-iters 50000 --seeds 0 1 2
 python scripts\validate_week4b.py --os-iters 100000 --es-iters 20000
+python experiments\exp05_leduc_cfr_variants.py --iters 10000
+python scripts\validate_week5.py --iters 10000
+python experiments\exp06_leduc_mccfr.py --iters 5000 --os-iters 500000 --es-iters 100000 --seeds 0 1 2
+python experiments\exp06_leduc_tournament.py --cfr-iters 5000 --n-pairs 5000 --seeds 0 1 2 3 4
+python scripts\validate_week6.py --os-iters 100000 --es-iters 20000
 ```
 
 All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--out-dir`)
@@ -109,6 +126,14 @@ via `chrome --headless=new --screenshot=... --virtual-time-budget=25000 <url>`, 
 Read the PNG.
 
 ## Progress log
+
+- **2026-06-20** — Weeks 5–6 experiment scripts implemented (Leduc Poker scaling).
+  Leduc has 9,457 tree nodes and 936 infosets (394× / 78× larger than Kuhn); no solver
+  code changes needed — all four are game-agnostic. New files: `exp05_leduc_cfr_variants.py`
+  (CFR vs CFR+, 3 figs + CSV), `exp06_leduc_mccfr.py` (4-way overlay, 3 figs + CSV),
+  `exp06_leduc_tournament.py` (7-agent Leduc cross-table), `validate_week5.py`,
+  `validate_week6.py`, `tests/test_leduc_smoke.py` (4 new tests; 41 total, all green).
+  Smoke runs all passed. Full runs pending — CFR on Leduc ≈ 0.145 s/iter (10k iters ≈ 24 min).
 
 - **2026-06-13 (later)** — Site restructured into sections: nav = Home / Games /
   Foundations / Regret / Results / References. New pages: /games (game index),

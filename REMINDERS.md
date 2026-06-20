@@ -1,5 +1,39 @@
 # Reminders — things to review manually
 
+## From the 2026-06-20 session (Weeks 5–6: Leduc Poker)
+
+- [ ] **Run exp05 full run** (CFR vs CFR+ on Leduc, ~24 min total):
+  `python experiments\exp05_leduc_cfr_variants.py --iters 10000`
+  Review `results/figures/week05_*.png` — headline: CFR+ should dominate by ~2+ orders
+  of magnitude. Leduc compressibility (zero-regret fraction) story should be even
+  stronger than Kuhn (more zero entries because the floored regret+ interacts with a
+  larger infoset space).
+
+- [ ] **Run validate_week5** (~24 min at 10k iters):
+  `python scripts\validate_week5.py --iters 10000`
+  Ratio ours/OpenSpiel should stay near 1.0 at all checkpoints for both CFR and CFR+.
+
+- [ ] **Run exp06 MCCFR full run** (~35 min, 3 seeds):
+  `python experiments\exp06_leduc_mccfr.py --iters 5000 --os-iters 500000 --es-iters 100000`
+  The nodes-touched plot (`week06_exploitability_vs_nodes.png`) is the paper-style
+  headline. On Leduc the per-node gap between OS and ES should be wider than on Kuhn
+  (larger tree = more expensive full traversal, bigger relative saving from sampling).
+
+- [ ] **Run exp06 tournament full run** (~30 min, 5 seeds):
+  `python experiments\exp06_leduc_tournament.py --cfr-iters 5000 --n-pairs 5000`
+  Review `week06_leduc_payoff_matrix.png` — CFRPlus should beat CFR at 5k iters; both
+  should dominate all baselines.
+
+- [ ] **Run validate_week6** (~15 min):
+  `python scripts\validate_week6.py --os-iters 100000 --es-iters 20000`
+
+- [ ] **Write-up note for the Leduc deck**: The key scaling insight is that CFR's full-
+  traversal cost grows linearly with tree size (9,457 nodes/iter on Leduc vs 24 on Kuhn),
+  making MCCFR's per-node advantage even more compelling at scale. CFR+ compressibility
+  (zero regret entries) is even more pronounced on Leduc.
+
+
+
 Items Claude flags for human review land here. Check them off (or delete them) once handled.
 
 ## From the 2026-06-13 session (website redesign)
