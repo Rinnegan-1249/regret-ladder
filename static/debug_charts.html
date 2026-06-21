@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>chart debug</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <style>body { padding: 1rem 2rem; } #errors { color: #f87171; font-family: monospace; white-space: pre-wrap; }</style>
+</head>
+<body>
+<div id="errors"></div>
+
+<h2 style="color:#fff">RPS</h2>
+<input type="number" id="rps-train-T" value="500">
+<input type="number" id="rps-train-seed" value="0">
+<select id="rps-train-player"><option value="1" selected>1</option><option value="2">2</option></select>
+<button id="rps-train-start">go</button>
+<div class="status" id="rps-train-status"></div>
+<div id="rps-strategy-chart" class="chart"></div>
+<div id="rps-regret-chart" class="chart-sm"></div>
+
+<h2 style="color:#fff">KUHN</h2>
+<select id="kuhn-train-algo"><option value="cfr" selected>cfr</option></select>
+<span id="kuhn-train-cap"></span>
+<input type="number" id="kuhn-train-T" value="200">
+<input type="number" id="kuhn-train-seed" value="0">
+<select id="kuhn-train-player"><option value="1" selected>1</option><option value="2">2</option></select>
+<button id="kuhn-train-start">go</button>
+<div class="status" id="kuhn-train-status"></div>
+<div id="kuhn-strategy-chart" class="chart"></div>
+<div id="kuhn-expl-chart" class="chart-sm"></div>
+
+<script>
+window.onerror = (msg, src, line, col) => {
+  document.getElementById("errors").textContent += `ERROR: ${msg} @ ${src}:${line}:${col}\n`;
+};
+</script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/training.js"></script>
+<script>
+document.getElementById("rps-train-start").click();
+document.getElementById("kuhn-train-start").click();
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Results — Regret Ladder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+        media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<nav>
+  <div class="brand">Regret <span>Ladder</span></div>
+  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
+  <a href="C:/Program Files/Git/regret-ladder/games" class="">Games</a>
+  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
+  <a href="C:/Program Files/Git/regret-ladder/regret" class="">Regret</a>
+  <a href="C:/Program Files/Git/regret-ladder/results" class="active">Results</a>
+  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+</nav>
+<main>
+
+
+<div class="hero" style="padding-top:1.6rem">
+  <div class="tagline">SEEDED &middot; REPRODUCIBLE &middot; VALIDATED VS OPENSPIEL</div>
+  <h1>Results</h1>
+  <p class="subtitle">Every figure below was produced by this project's seeded experiment scripts —
+  nothing is illustrative or mocked. Numbers cite the iteration budgets used.</p>
+</div>
+
+<h2>Rock–Paper–Scissors: regret matching (Week 2)</h2>
+<p>
+  Expected-utility regret-matching self-play, 100,000 iterations, 5 seeds. Findings:
+</p>
+<ul>
+  <li><strong>Average strategy → Nash.</strong> All seeds converge to the unique equilibrium
+    \((1/3, 1/3, 1/3)\) to within \(10^{-3}\) by \(10^5\) iterations, from very different seeded
+    starting perturbations.</li>
+  <li><strong>Average regret decays like \(1/T\)</strong> with expected updates (the sampled variant's
+    guarantee is \(O(1/\sqrt{T})\)) — the log–log decay line is straight over four decades.</li>
+</ul>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week02_rps_average_strategy_seed0.png" alt="RPS strategy convergence">
+  <figcaption>Average strategy convergence (seed 0): the early bias decays into the equilibrium.</figcaption>
+</div>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week02_rps_average_regret_seed0.png" alt="RPS regret decay">
+  <figcaption>Average regret \(R_T/T\) decay, log–log (seed 0).</figcaption>
+</div>
+
+<h2>Kuhn Poker: vanilla CFR (Week 3, Zinkevich et al. [1])</h2>
+<p>
+  From-scratch tabular CFR, validated against OpenSpiel's <code>CFRSolver</code>: the two exploitability
+  traces coincide across all checkpoints. Exploitability of the average strategy falls as
+  \(O(1/\sqrt{T})\)–to–\(O(1/T)\), reaching <strong>2.3×10⁻³</strong> chips/hand at 10,000 iterations.
+</p>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week03_cfr_convergence.png" alt="CFR convergence vs OpenSpiel">
+  <figcaption>Our vanilla CFR vs OpenSpiel's reference solver.</figcaption>
+</div>
+
+<h2>Kuhn Poker: CFR+ (Week 4, Tammelin [3])</h2>
+<table class="tbl">
+  <tr><th>Metric @ 10,000 iterations</th><th>Vanilla CFR</th><th>CFR+</th></tr>
+  <tr><td>Average-strategy exploitability</td><td>2.3×10⁻³</td><td><strong>9.1×10⁻⁶ (≈255× better)</strong></td></tr>
+  <tr><td>Current-strategy exploitability</td><td>1.5×10⁻¹ (oscillates)</td><td><strong>8.5×10⁻³ (decaying)</strong></td></tr>
+  <tr><td>Game value (P1)</td><td>—</td><td>−0.055556 = −1/18 exactly</td></tr>
+</table>
+<p>
+  The recovered CFR+ average strategy is an <em>exact</em> member of Kuhn's Nash family:
+  \(\alpha = P(\text{bet}|J) = 0.2226\), \(P(\text{bet}|Q) = 0\),
+  \(P(\text{bet}|K) = 0.6678 = 3\alpha\). The paper's two empirical claims both reproduce:
+  the average strategy converges an order of magnitude (here ~2.5 orders) faster, and the
+  <em>current</em> strategy (nearly) converges — vanilla CFR's current strategy never does.
+  The compressibility claim (§3 of the paper) also reproduces: a large fraction of CFR+'s regret
+  entries stay exactly zero while CFR accumulates negative regret indefinitely.
+</p>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week04_exploitability_vs_iterations.png" alt="CFR vs CFR+ exploitability">
+  <figcaption>Average and current strategy exploitability, CFR vs CFR+, log–log.</figcaption>
+</div>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week04_current_strategy_trace.png" alt="current strategy trace">
+  <figcaption>Current-strategy P(bet) at Player 1's opening infosets: CFR+ (solid) locks onto the
+  equilibrium; CFR (dotted) oscillates forever.</figcaption>
+</div>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week04_zero_regret_fraction.png" alt="zero regret fraction">
+  <figcaption>Fraction of cumulative-regret entries exactly zero (Tammelin §3 compressibility).</figcaption>
+</div>
+
+<h2>Kuhn Poker: MCCFR (Week 4, Lanctot et al. [2])</h2>
+<p>
+  Four-way comparison at each algorithm's budget (CFR/CFR+ 10k iterations; OS-MCCFR 200k ×3 seeds;
+  ES-MCCFR 50k ×3 seeds), on the paper's own metric — exploitability vs <strong>nodes touched</strong>:
+</p>
+<table class="tbl">
+  <tr><th>Algorithm</th><th>Iterations</th><th>Final avg-strategy exploitability</th><th>Nodes touched</th></tr>
+  <tr><td>Vanilla CFR</td><td>10,000</td><td>2.3×10⁻³</td><td>5.8×10⁵</td></tr>
+  <tr><td>CFR+</td><td>10,000</td><td><strong>9.1×10⁻⁶</strong></td><td>1.2×10⁶</td></tr>
+  <tr><td>OS-MCCFR</td><td>200,000</td><td>5.9×10⁻³ (3-seed mean)</td><td>2.1×10⁶</td></tr>
+  <tr><td>ES-MCCFR</td><td>50,000</td><td>2.5×10⁻³ (3-seed mean)</td><td>7.3×10⁵</td></tr>
+</table>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week04b_exploitability_vs_nodes.png" alt="MCCFR comparison by nodes touched">
+  <figcaption>Paper-style comparison (Lanctot et al. Figure 1): exploitability vs nodes touched.
+  Thin lines are individual MCCFR seeds; bold is the mean.</figcaption>
+</div>
+<div class="note warn">
+  <strong>The honest finding:</strong> on Kuhn, MCCFR does <em>not</em> beat full-traversal CFR per node
+  touched — ES roughly ties vanilla CFR and OS trails with sampling noise, while CFR+ dominates by ~2.5
+  orders of magnitude. This is what the theory predicts: Kuhn's tree has 58 nodes, so a "full traversal"
+  costs almost nothing and sampling can only save a factor of ~4–5, less than the variance penalty it
+  introduces (plus OS's \(1/\delta\) bound inflation, Theorem 5). The paper's dramatic wins use games
+  with \(10^7\)–\(10^8\) histories (their "One-Card Poker" is Kuhn with a <em>500-card deck</em>).
+  Even the paper itself shows OS losing to pruned CFR on Latent Tic-Tac-Toe. Verdict: MCCFR's advantage
+  is an asymptotic-in-game-size claim — the motivation for scaling to Leduc Poker next.
+</div>
+<p>
+  Both MCCFR implementations were validated against OpenSpiel's <code>OutcomeSamplingSolver</code> and
+  <code>ExternalSamplingSolver</code> at matching iteration counts (same order of magnitude at every
+  checkpoint). Our CFR+ also tracks OpenSpiel's <code>CFRPlusSolver</code>:
+  at 10/100/1,000/10,000 iterations ours reads 2.9×10⁻²/9.6×10⁻⁴/7.1×10⁻⁵/9.1×10⁻⁶ vs OpenSpiel's
+  3.3×10⁻²/1.2×10⁻³/8.7×10⁻⁵/9.6×10⁻⁶.
+</p>
+
+<h2>Leduc Poker: scaling CFR/CFR+ and MCCFR (Weeks 5–6)</h2>
+<p>
+  Leduc Poker has 9,457 game-tree nodes and 936 information sets — 394&times; and 78&times; larger than
+  Kuhn, respectively — and all four solvers run on it with <strong>zero code changes</strong> (they were
+  already game-agnostic). CFR+'s exploitability win over vanilla CFR <strong>grows</strong> with game
+  size: 255&times; on Kuhn &rarr; <strong>2,164&times; on Leduc</strong> at 10,000 iterations.
+</p>
+<table class="tbl">
+  <tr><th>Metric @ 10,000 iterations</th><th>Vanilla CFR</th><th>CFR+</th></tr>
+  <tr><td>Average-strategy exploitability</td><td>1.04×10⁻²</td><td><strong>4.82×10⁻⁶ (≈2,164× better)</strong></td></tr>
+  <tr><td>Current-strategy exploitability</td><td>1.10×10⁰ (oscillates)</td><td><strong>2.06×10⁻³ (decaying)</strong></td></tr>
+</table>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week05_exploitability_vs_iterations.png" alt="Leduc CFR vs CFR+ exploitability">
+  <figcaption>Average and current strategy exploitability, CFR vs CFR+, log–log, on Leduc.</figcaption>
+</div>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week05_zero_regret_fraction.png" alt="Leduc zero regret fraction">
+  <figcaption>Fraction of cumulative-regret entries exactly zero — the compressibility claim
+  reproduces at this scale too.</figcaption>
+</div>
+<p>
+  The full 4-way comparison (CFR, CFR+, OS-MCCFR, ES-MCCFR) by nodes touched mirrors the honest finding
+  from Kuhn, now at a larger scale: full-traversal solvers remain more node-efficient than MCCFR on a
+  game this size, though the gap between sampling and full traversal narrows as the tree grows.
+</p>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week06_exploitability_vs_nodes.png" alt="Leduc 4-way MCCFR comparison by nodes touched">
+  <figcaption>Exploitability vs nodes touched: CFR, CFR+, OS-MCCFR, ES-MCCFR on Leduc.</figcaption>
+</div>
+<p>
+  Both CFR and CFR+ (5,000 iterations each) dominate all five baseline agents in a 7-agent round-robin
+  tournament, by almost identical margins, and are statistically indistinguishable head-to-head
+  (mean −0.00058 chips/hand, <em>not</em> significant) — both have already converged to an
+  effectively Nash-equivalent strategy at this budget.
+</p>
+<div class="figure">
+  <img src="C:/Program Files/Git/regret-ladder/figures/week06_leduc_payoff_matrix.png" alt="Leduc 7-agent tournament payoff matrix">
+  <figcaption>7-agent round-robin payoff matrix on Leduc Poker.</figcaption>
+</div>
+
+
+</main>
+<footer>
+  Regret Ladder — a summer research project on regret minimization in games.
+  All bots and live-training graphs are computed by the project's actual validated solvers.
+</footer>
+<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\(", right: "\\)", display: false}
+      ]
+    });
+  }
+});
+</script>
+</body>
+</html>

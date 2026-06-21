@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leduc Poker — Regret Ladder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+        media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<nav>
+  <div class="brand">Regret <span>Ladder</span></div>
+  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
+  <a href="C:/Program Files/Git/regret-ladder/games" class="active">Games</a>
+  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
+  <a href="C:/Program Files/Git/regret-ladder/regret" class="">Regret</a>
+  <a href="C:/Program Files/Git/regret-ladder/results" class="">Results</a>
+  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+</nav>
+<main>
+
+
+<div class="hero" style="padding-top:1.6rem">
+  <div class="tagline">RUNGS 05–06 — SCALING TO A LARGER GAME</div>
+  <h1>Leduc <span class="accent">Poker</span></h1>
+  <p class="subtitle">A 6-card deck, a public board card, and two betting rounds — 936 information sets,
+  78&times; more than Kuhn. Watch recorded hands from the trained bots, and the same CFR family training
+  at this larger scale.</p>
+</div>
+
+<div id="leduc-tabs">
+<div class="tabs">
+  <button class="active" data-pane="pane-lgame">01 / The game</button>
+  <button data-pane="pane-lplay">02 / Watch a hand</button>
+  <button data-pane="pane-ltrain">03 / Training at scale</button>
+  <button data-pane="pane-ltheory">04 / Theory</button>
+</div>
+
+<!-- ============================== GAME ============================== -->
+<div class="tabpane active" id="pane-lgame">
+  <h3 style="margin-top:0">Rules</h3>
+  <p>
+    Leduc Hold'em (Southey et al. 2005) uses a 6-card deck: two suits of <strong>Jack, Queen, King</strong>
+    (suit is irrelevant to hand strength). Both players ante 1 chip and are dealt one private card.
+    There are <strong>two betting rounds</strong>: the first on the private cards alone, the second after
+    a single public board card is revealed. A pair (private card matching the board) beats any unpaired
+    hand; unpaired hands are ranked by card alone. Bets are a fixed size per round (2 chips in round 1,
+    4 in round 2), with a cap of 2 raises per round.
+  </p>
+  <p>
+    Leduc's tree has <strong>9,457 nodes and 936 information sets</strong> — 394&times; and 78&times;
+    larger than Kuhn — large enough that the asymptotic differences between full-traversal CFR/CFR+ and
+    the sampling-based MCCFR variants start to show up, though (as the training tab shows) not yet enough
+    to flip the verdict from Kuhn: full traversal still wins per node touched at this scale.
+  </p>
+  <h3>Encodings</h3>
+  <table class="tbl">
+    <tr><th>Action ID</th><th>Meaning</th></tr>
+    <tr><td>0</td><td>Fold (only legal facing a bet)</td></tr>
+    <tr><td>1</td><td>Check / Call</td></tr>
+    <tr><td>2</td><td>Bet / Raise (if a raise isn't already capped for the round)</td></tr>
+  </table>
+</div>
+
+<!-- ============================== PLAY (always a static walkthrough — see note) ============================== -->
+<div class="tabpane" id="pane-lplay">
+  <h3 style="margin-top:0">Watch a recorded match</h3>
+  <div class="controls">
+    <div class="field">Recorded match
+      <select id="l-walk-pick">
+        <option value="1">CFR+ vs Always-Call (4 hands, seed 0)</option><option value="2">CFR+ vs Always-Call (4 hands, seed 1)</option><option value="3">CFR+ vs Always-Call (4 hands, seed 2)</option>
+      </select>
+    </div>
+    <button class="primary" id="l-walk-start">Watch</button>
+  </div>
+  <div class="note">
+    Leduc's CFR+ bot plays a <strong>frozen average policy trained by this project's solver</strong>
+    (same class used in <code>experiments/exp05_leduc_cfr_variants.py</code>). Unlike Kuhn, this page
+    steps through <strong>whole hands</strong> rather than individual actions — Leduc's two betting
+    rounds and public card make a full interactive per-click experience a much bigger undertaking than
+    is warranted for a demo; recorded hands show the same cards, betting, and outcomes a live match
+    would have, just paced by you instead of the clock.
+  </div>
+  <div class="status" id="l-status"></div>
+
+  <div id="l-game" style="display:none">
+    <div class="controls">
+      <button id="l-walk-prev">&larr; Prev hand</button>
+      <span id="l-walk-step-label" class="card-label"></span>
+      <button id="l-walk-next">Next hand &rarr;</button>
+    </div>
+    <div class="scoreboard">
+      <div><div class="score" id="l-total1">0</div><div class="who" id="l-who1">Player 1</div></div>
+      <div><div class="score" id="l-total2">0</div><div class="who" id="l-who2">Player 2</div></div>
+      <div><div class="score" id="l-handno">0 / 0</div><div class="who">hands</div></div>
+    </div>
+
+    <div id="l-table" class="poker-table">
+      <div class="table-row">
+        <div>
+          <div class="pcard-wrap">
+            <div class="pcard" id="l-opp-card">
+              <div class="face back"></div>
+              <div class="face front"><span class="rank" id="l-opp-rank"></span></div>
+            </div>
+          </div>
+          <div class="card-label">Player 2</div>
+        </div>
+        <div class="pot">
+          <div class="chips" id="l-pot">2</div>
+          <div class="lbl">pot (chips)</div>
+        </div>
+        <div>
+          <div class="pcard-wrap">
+            <div class="pcard faceup" id="l-your-card">
+              <div class="face back"></div>
+              <div class="face front"><span class="rank" id="l-your-rank"></span></div>
+            </div>
+          </div>
+          <div class="card-label">Player 1</div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:1rem">
+        <div class="pcard-wrap" style="display:inline-block">
+          <div class="pcard" id="l-public-card">
+            <div class="face back"></div>
+            <div class="face front"><span class="rank" id="l-public-rank"></span></div>
+          </div>
+        </div>
+        <div class="card-label">Public card</div>
+      </div>
+      <div class="hand-banner" id="l-banner"></div>
+      <div style="margin-top:0.8rem">
+        <div class="card-label" style="text-align:left">Round 1 betting</div>
+        <div class="bet-chips" id="l-round1-log"></div>
+      </div>
+      <div style="margin-top:0.5rem">
+        <div class="card-label" style="text-align:left">Round 2 betting</div>
+        <div class="bet-chips" id="l-round2-log"></div>
+      </div>
+    </div>
+
+    <h3>Hand log</h3>
+    <div class="log">
+      <table class="tbl" id="l-log" style="width:100%">
+        <thead><tr><th>#</th><th>Public</th><th>Outcome</th><th>Cards</th><th>P1 payoff</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== TRAIN ============================== -->
+<div class="tabpane" id="pane-ltrain">
+  <h3 style="margin-top:0">CFR vs CFR+ at Leduc's scale</h3>
+  <p>
+    Leduc has too many information sets (936) to chart per-infoset bet probabilities the way the Kuhn
+    page does, so this replays the headline result from
+    <a href="C:/Program Files/Git/regret-ladder/results">Results</a> instead: exploitability and the zero-regret-entry fraction,
+    CFR vs CFR+, over the actual validated 10,000-iteration training run
+    (<code>results/tables/week05_leduc_cfr_variants.csv</code>) — animated checkpoint by checkpoint.
+  </p>
+  <div class="controls">
+    <button class="primary" id="leduc-train-start">Replay training</button>
+  </div>
+  <div class="status" id="leduc-train-status"></div>
+  <div id="leduc-expl-chart" class="chart"></div>
+  <div id="leduc-zeroreg-chart" class="chart-sm"></div>
+  <div class="note">
+    CFR+'s exploitability win over vanilla CFR <strong>grows</strong> with game size: 255&times; on Kuhn
+    &rarr; <strong>2,164&times; on Leduc</strong> at 10,000 iterations — the regret floor matters more as
+    more information sets accumulate negative regret that vanilla CFR would otherwise keep oscillating
+    around. See <a href="C:/Program Files/Git/regret-ladder/results">Results</a> for the full 4-way comparison against MCCFR by
+    nodes touched.
+  </div>
+</div>
+
+<!-- ============================== THEORY ============================== -->
+<div class="tabpane" id="pane-ltheory">
+  <h3 style="margin-top:0">Same algorithms, larger game</h3>
+  <p>
+    Every solver here — <code>VanillaCFR</code>, <code>CFRPlus</code>, <code>OutcomeSamplingMCCFR</code>,
+    <code>ExternalSamplingMCCFR</code> — is the exact same game-agnostic implementation used on Kuhn
+    (see the <a href="C:/Program Files/Git/regret-ladder/kuhn">Kuhn page</a> and <a href="C:/Program Files/Git/regret-ladder/regret">Regret section</a>
+    for the algorithm definitions); pointing them at <code>leduc_poker</code> instead of
+    <code>kuhn_poker</code> required <strong>zero solver code changes</strong> — they operate purely
+    through OpenSpiel's generic information-state interface.
+  </p>
+  <p>
+    What changes with scale: vanilla CFR's average-strategy exploitability is the same order of magnitude
+    as OpenSpiel's reference solver throughout training, but the gap between full-traversal solvers and
+    MCCFR's sampling variants narrows — MCCFR needs much larger iteration budgets here (500,000 for
+    OS-MCCFR, 100,000 for ES-MCCFR, vs 10,000 for CFR/CFR+) to reach comparable exploitability, since
+    sample variance grows with the size of the tree being sampled. See
+    <a href="C:/Program Files/Git/regret-ladder/results">Results</a> for the full numbers.
+  </p>
+</div>
+</div>
+
+
+</main>
+<footer>
+  Regret Ladder — a summer research project on regret minimization in games.
+  All bots and live-training graphs are computed by the project's actual validated solvers.
+</footer>
+<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="C:/Program Files/Git/regret-ladder/static/js/leduc.js?v=1782024649"></script>
+<script src="C:/Program Files/Git/regret-ladder/static/js/training.js?v=1782024649"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\(", right: "\\)", display: false}
+      ]
+    });
+  }
+});
+</script>
+</body>
+</html>
