@@ -7,7 +7,7 @@
       if (paneId === "pane-ktrain" && window.kuhnTrainPlaceholders) window.kuhnTrainPlaceholders();
     });
   }
-  if (!el("k-start")) return;
+  if (!el("k-start") && !el("k-walk-start")) return;
 
   let matchId = null;
   let isAuto = false;
@@ -172,6 +172,7 @@
     }
   }
 
+  if (el("k-start")) {
   el("k-start").addEventListener("click", async () => {
     const p1 = el("k-p1").value, p2 = el("k-p2").value;
     isAuto = p1 !== "human" && p2 !== "human";
@@ -221,4 +222,91 @@
       el("k-start").disabled = false;
     }
   });
+  } // end live-mode block
+
+  /* ---------------- static-mode walkthrough (GitHub Pages build) ---------------- */
+  if (el("k-walk-start")) {
+    let walkViews = [];
+    let walkIdx = -1;
+
+    function renderWalkStep(view) {
+      el("k-game").style.display = "";
+      el("k-total1").textContent = view.totals[0].toFixed(0);
+      el("k-total2").textContent = view.totals[1].toFixed(0);
+      el("k-handno").textContent = `${view.hands_played} / ${view.hands_total}`;
+      el("k-table").style.display = "";
+
+      if (view.last_hand && view.last_hand.hand > lastLoggedHand) {
+        const lh = view.last_hand;
+        appendHandLog(lh);
+        lastLoggedHand = lh.hand;
+        bankroll.push((bankroll[bankroll.length - 1] || 0) + lh.payoffs[humanSeat]);
+        showBanner(lh);
+        updateBankrollChart();
+        const oppKey = `p${(1 - humanSeat) + 1}`;
+        setOppCard(lh.cards[oppKey], lh.showdown);
+      } else {
+        el("k-banner").className = "hand-banner";
+        el("k-banner").textContent = "";
+      }
+
+      if (view.finished) {
+        el("k-actions").innerHTML = "";
+        setStatus(el("k-status"),
+          `Match finished. Net: ${view.totals[humanSeat]} chips over ${view.hands_played} hands ` +
+          `(${(view.totals[humanSeat] / view.hands_played).toFixed(3)} chips/hand).`);
+        return;
+      }
+      if (view.to_act !== undefined) {
+        setYourCard(view.your_card);
+        el("k-seat").textContent = view.your_seat;
+        el("k-pot").textContent = potOf(view.betting || "");
+        bettingChips(view.betting || "", humanSeat);
+        el("k-actions").innerHTML = view._next_action_label
+          ? `<span class="status">Action taken: <strong>${view._next_action_label}</strong></span>`
+          : "";
+      }
+    }
+
+    function walkGoTo(i) {
+      walkIdx = Math.max(0, Math.min(i, walkViews.length - 1));
+      lastLoggedHand = 0;
+      bankroll = [0];
+      el("k-log").querySelector("tbody").innerHTML = "";
+      el("k-bankroll-chart").style.display = "none";
+      el("k-banner").className = "hand-banner";
+      el("k-banner").textContent = "";
+      setOppCard(null, false);
+      for (let k = 0; k <= walkIdx; k++) renderWalkStep(walkViews[k]);
+      el("k-walk-step-label").textContent = `Step ${walkIdx + 1} / ${walkViews.length}`;
+      el("k-walk-prev").disabled = walkIdx <= 0;
+      el("k-walk-next").disabled = walkIdx >= walkViews.length - 1;
+    }
+
+    el("k-walk-prev").addEventListener("click", () => walkGoTo(walkIdx - 1));
+    el("k-walk-next").addEventListener("click", () => walkGoTo(walkIdx + 1));
+
+    el("k-walk-start").addEventListener("click", async () => {
+      try {
+        setStatus(el("k-status"), "Loading recorded hand…");
+        el("k-walk-start").disabled = true;
+        const id = el("k-walk-pick").value;
+        const data = await getJSON(`${window.SITE_BASE || ""}/static/data/walkthroughs/kuhn_${id}.json`);
+        humanSeat = data.human_seat;
+        walkViews = data.views;
+        el("k-log").querySelector("tbody").innerHTML = "";
+        el("k-auto-result").style.display = "none";
+        el("k-bankroll-chart").style.display = "none";
+        el("k-who1").textContent = `P1 — ${data.seat_labels[0]}`;
+        el("k-who2").textContent = `P2 — ${data.seat_labels[1]}`;
+        el("k-opp-label").textContent = data.seat_labels[1 - humanSeat];
+        setStatus(el("k-status"), "Loaded — step through with Prev/Next.");
+        walkGoTo(0);
+      } catch (err) {
+        setStatus(el("k-status"), err.message, true);
+      } finally {
+        el("k-walk-start").disabled = false;
+      }
+    });
+  }
 })();

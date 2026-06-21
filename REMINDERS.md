@@ -1,5 +1,28 @@
 # Reminders — things to review manually
 
+## From the 2026-06-21 session (GitHub Pages export + Leduc page)
+
+- [ ] **Push the gh-pages branch and enable GitHub Pages.** A `gh-pages` branch was
+  built locally (committed, not pushed) with the static site. To go live:
+  `cd .gh-pages-worktree && git push origin gh-pages` (or rerun
+  `python scripts/deploy_gh_pages.py --base /regret-ladder --push`), then in the GitHub
+  repo settings → Pages, set source = `gh-pages` branch, `/` (root). Confirm the
+  `--base` value matches the real Pages URL subpath (`/regret-ladder` for
+  `rinnegan-1249.github.io/regret-ladder/`; use `""` instead if a custom domain or a
+  user/org root site is set up).
+- [ ] **Eyeball the static site once deployed** — verify nav links, the Kuhn/Leduc
+  walkthroughs, and all three training-replay charts actually render at the live
+  Pages URL (tested locally via headless Chrome + CDP automation, but a real subpath
+  deploy can surface path issues the local `--base ""` test didn't catch).
+- [ ] **Rerun `scripts/build_web_static_data.py` + `scripts/deploy_gh_pages.py`** any
+  time `poker_ai/` solver behavior, `web/bots.py`'s bot configs, or the committed
+  Week 5 CSV change — the static site's data is a frozen snapshot, not auto-synced.
+- [ ] **Decide on Leduc's walkthrough granularity.** Unlike Kuhn (action-by-action,
+  reusing the real `kuhn_engine.KuhnMatch` API shape), the Leduc walkthrough steps by
+  whole hand, not individual action — a deliberate scope cut (Leduc's two betting
+  rounds + public card made action-level stepping enough extra work to not be worth
+  it for a demo). Revisit if a more granular Leduc play experience is wanted later.
+
 ## From the 2026-06-21 session (Week 7: Final Report)
 
 - [ ] **Review `reports/Final_Report.md`** — generated draft covering Weeks 1–6 with

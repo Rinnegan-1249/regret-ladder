@@ -40,11 +40,23 @@ KUHN_BASELINE_BOTS = {
     "ev_heuristic": ("EV-Heuristic", lambda seed: EVHeuristicAgent(seed=seed)),
 }
 
+# Leduc CFR-family bots: only the two full-traversal solvers. OS/ES-MCCFR are not
+# needed here (no policy-table bot for them) - the Leduc training chart is sourced
+# from the already-validated results/tables/week05_leduc_cfr_variants.csv instead of
+# a fresh in-browser-facing training run, and these two converged policies are enough
+# for the static walkthrough's "Nash strategy" opponent.
+LEDUC_CFR_BOTS = {
+    "cfr": ("Vanilla CFR (5k iters)", "cfr", 5_000, None),
+    "cfr_plus": ("CFR+ (5k iters)", "cfr_plus", 5_000, None),
+}
+
+LEDUC_BASELINE_BOTS = KUHN_BASELINE_BOTS
+
 RPS_TRAIN_ITERS = 10_000
 
 
-def _train_kuhn_solver(kind: str, iterations: int, seed: int | None):
-    game = pyspiel.load_game("kuhn_poker")
+def _train_solver(game_name: str, kind: str, iterations: int, seed: int | None):
+    game = pyspiel.load_game(game_name)
     if kind == "cfr":
         from poker_ai.agents.cfr import VanillaCFR
         solver = VanillaCFR(game)
@@ -79,17 +91,27 @@ def _solver_average_table(solver) -> dict[str, list[float]]:
     return table
 
 
-def get_kuhn_policy_table(bot_id: str) -> dict[str, list[float]]:
-    """Cached frozen average policy for a CFR-family bot."""
-    label, kind, iterations, seed = KUHN_CFR_BOTS[bot_id]
-    cache = CACHE_DIR / f"kuhn_{bot_id}_{iterations}.json"
+def _get_policy_table(
+    game_name: str, prefix: str, cfr_bots: dict, bot_id: str
+) -> dict[str, list[float]]:
+    """Cached frozen average policy for a CFR-family bot on the given game."""
+    label, kind, iterations, seed = cfr_bots[bot_id]
+    cache = CACHE_DIR / f"{prefix}_{bot_id}_{iterations}.json"
     if cache.exists():
         return json.loads(cache.read_text(encoding="utf-8"))
-    solver = _train_kuhn_solver(kind, iterations, seed)
+    solver = _train_solver(game_name, kind, iterations, seed)
     table = _solver_average_table(solver)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(table), encoding="utf-8")
     return table
+
+
+def get_kuhn_policy_table(bot_id: str) -> dict[str, list[float]]:
+    return _get_policy_table("kuhn_poker", "kuhn", KUHN_CFR_BOTS, bot_id)
+
+
+def get_leduc_policy_table(bot_id: str) -> dict[str, list[float]]:
+    return _get_policy_table("leduc_poker", "leduc", LEDUC_CFR_BOTS, bot_id)
 
 
 class TablePolicyBot:
@@ -114,16 +136,24 @@ class TablePolicyBot:
         return int(self.rng.choice(legal, p=weights))
 
 
-def make_kuhn_bot(bot_id: str, seed: int = 0):
-    if bot_id in KUHN_BASELINE_BOTS:
-        label, factory = KUHN_BASELINE_BOTS[bot_id]
+def _make_bot(baseline_bots: dict, cfr_bots: dict, get_table_fn, bot_id: str, seed: int):
+    if bot_id in baseline_bots:
+        label, factory = baseline_bots[bot_id]
         agent = factory(seed)
         agent.name = label
         return agent
-    if bot_id in KUHN_CFR_BOTS:
-        label = KUHN_CFR_BOTS[bot_id][0]
-        return TablePolicyBot(label, get_kuhn_policy_table(bot_id), seed=seed)
-    raise ValueError(f"Unknown Kuhn bot id: {bot_id}")
+    if bot_id in cfr_bots:
+        label = cfr_bots[bot_id][0]
+        return TablePolicyBot(label, get_table_fn(bot_id), seed=seed)
+    raise ValueError(f"Unknown bot id: {bot_id}")
+
+
+def make_kuhn_bot(bot_id: str, seed: int = 0):
+    return _make_bot(KUHN_BASELINE_BOTS, KUHN_CFR_BOTS, get_kuhn_policy_table, bot_id, seed)
+
+
+def make_leduc_bot(bot_id: str, seed: int = 0):
+    return _make_bot(LEDUC_BASELINE_BOTS, LEDUC_CFR_BOTS, get_leduc_policy_table, bot_id, seed)
 
 
 def get_rps_frozen_strategy() -> list[float]:
@@ -150,9 +180,17 @@ def get_rps_frozen_strategy() -> list[float]:
     return strategy
 
 
-def list_kuhn_bots() -> list[dict]:
+def _list_bots(baseline_bots: dict, cfr_bots: dict) -> list[dict]:
     bots = [{"id": bid, "label": label, "family": "baseline"}
-            for bid, (label, _f) in KUHN_BASELINE_BOTS.items()]
+            for bid, (label, _f) in baseline_bots.items()]
     bots += [{"id": bid, "label": spec[0], "family": "cfr"}
-             for bid, spec in KUHN_CFR_BOTS.items()]
+             for bid, spec in cfr_bots.items()]
     return bots
+
+
+def list_kuhn_bots() -> list[dict]:
+    return _list_bots(KUHN_BASELINE_BOTS, KUHN_CFR_BOTS)
+
+
+def list_leduc_bots() -> list[dict]:
+    return _list_bots(LEDUC_BASELINE_BOTS, LEDUC_CFR_BOTS)

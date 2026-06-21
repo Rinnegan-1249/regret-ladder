@@ -116,22 +116,69 @@ All experiment scripts accept output-path overrides (`--out` / `--outdir` / `--o
 
 ## Web demo (`web/`)
 
-FastAPI app (`uvicorn web.app:app`): RPS + Kuhn play vs real bots, live SSE training
-graphs, theory/results/references pages. Key modules: `web/bots.py` (policy training +
-JSON cache in gitignored `web/cache/`), `web/rps_engine.py` & `web/kuhn_engine.py`
-(in-memory match stores), `web/training_stream.py` (SSE generators with hard iteration
-caps), templates+vanilla JS with Plotly/KaTeX CDN. Tests in `tests/test_web.py` use a
-`fast_cfr_bots` fixture (tiny budgets, tmp cache). Gotchas: (1) PowerShell mangles
-double quotes in inline `python -c` here-strings — use single quotes/percent-
-formatting. (2) `Plotly.react` compares trace arrays BY REFERENCE — arrays mutated in
-place with push() are treated as unchanged and never redraw; always pass `.slice()`
-copies. (3) To debug client-side chart issues empirically: headless Chrome screenshot
-of `web/static/debug_charts.html` (auto-runs both training streams through the real JS)
-via `chrome --headless=new --screenshot=... --virtual-time-budget=25000 <url>`, then
-Read the PNG.
+FastAPI app (`uvicorn web.app:app`): RPS + Kuhn + Leduc play vs real bots, live SSE
+training graphs (RPS/Kuhn) or replayed-from-data training charts (Leduc), theory/
+results/references pages. Key modules: `web/bots.py` (policy training + JSON cache in
+gitignored `web/cache/`; `LEDUC_CFR_BOTS`/`LEDUC_BASELINE_BOTS` mirror the Kuhn
+constants), `web/rps_engine.py` & `web/kuhn_engine.py` (in-memory match stores — no
+Leduc equivalent; Leduc play is a static walkthrough, never a live match), `web/
+training_stream.py` (SSE generators with hard iteration caps), templates+vanilla JS
+with Plotly/KaTeX CDN. Tests in `tests/test_web.py` use a `fast_cfr_bots` fixture (tiny
+budgets, tmp cache). Gotchas: (1) PowerShell mangles double quotes in inline `python -c`
+here-strings — use single quotes/percent-formatting. (2) `Plotly.react` compares trace
+arrays BY REFERENCE — arrays mutated in place with push() are treated as unchanged and
+never redraw; always pass `.slice()` copies. (3) To debug client-side chart issues
+empirically: headless Chrome screenshot of `web/static/debug_charts.html` (auto-runs
+both training streams through the real JS) via
+`chrome --headless=new --screenshot=... --virtual-time-budget=25000 <url>`, then Read
+the PNG.
+
+### Static (GitHub Pages) export
+
+Same templates/JS serve a fully static build with zero server/Python at runtime,
+toggled by a `static_mode` Jinja flag (`base.html` sets `window.STATIC_MODE`/
+`window.SITE_BASE`). Two-step build, run manually whenever content changes (no CI):
+
+1. `python scripts/build_web_static_data.py` — offline precompute into
+   `web/static/data/` (committed, unlike the gitignored `web/cache/`): frozen bot
+   policies (`policies/`), training-replay checkpoint arrays for the "live" charts
+   (`training/` — RPS/Kuhn reuse `training_stream.py`'s exact checkpoint logic; Leduc
+   reuses the already-validated `results/tables/week05_leduc_cfr_variants.csv`
+   directly, no retraining), and fixed example-hand walkthroughs (`walkthroughs/`).
+2. `python scripts/build_static_site.py --base /regret-ladder` — renders every
+   route to flat HTML into `.gh-pages-build/` (gitignored; **not** `docs/`, which is
+   already used for project documentation), copies `web/static/`, `Research_Papers/`,
+   `results/figures/`.
+3. `python scripts/deploy_gh_pages.py --base /regret-ladder [--push]` — does both of
+   the above, then mirrors the build into a `gh-pages` branch via a git worktree at
+   `.gh-pages-worktree/` (created fresh and stripped to empty on first run) and commits.
+   Without `--push` it stops after committing locally so the diff can be reviewed.
+
+Design notes: RPS's `RegretMatchingAgent`/payoff math has zero OpenSpiel dependency, so
+RPS play is ported to genuine client-side JS (`web/static/js/rps_engine.js`) — it's the
+one feature that stays fully live on the static site. Kuhn/Leduc's CFR family depends
+on OpenSpiel's C++ bindings (`pyspiel`), which cannot run in-browser (no WASM build,
+Pyodide can't load it) — so Kuhn/Leduc "play" becomes a static walkthrough (precomputed
+fixed hands, Prev/Next stepper) and all "live" training graphs become precomputed-
+checkpoint replay (`replayCheckpoints`/`startReplayOrLive` in `training.js`/
+`common.js`) feeding the *same* Plotly render functions used for live SSE — visually
+identical, zero retraining risk. Leduc never had a live match engine even in FastAPI
+mode (`leduc.html` has no `static_mode` branch — it's always the walkthrough).
 
 ## Progress log
 
+- **2026-06-21 (latest)** — Added a static GitHub Pages export of the web demo
+  (`scripts/build_web_static_data.py`, `scripts/build_static_site.py`,
+  `scripts/deploy_gh_pages.py`) and a new Leduc page (`web/templates/leduc.html`,
+  `web/static/js/leduc.js`, `LEDUC_CFR_BOTS`/`LEDUC_BASELINE_BOTS` in `web/bots.py`,
+  `/leduc` route in `web/app.py`). FastAPI app (`web/app.py`) is unchanged in live
+  behavior — all 41 tests still pass. Deploys via a `gh-pages` branch (kept out of
+  `docs/`, which already holds project documentation) using a git worktree at
+  `.gh-pages-worktree/`; tested locally end-to-end (templates render, JS runs
+  error-free under headless Chrome + CDP — walkthrough stepping, training-replay
+  charts, and RPS's fully-client-side play all verified interactively) but **not
+  pushed to origin** — pushing `gh-pages` and enabling Pages in repo settings are
+  manual follow-ups (see REMINDERS.md).
 - **2026-06-21 (later)** — Wrote `reports/Final_Report.md`: consolidated Week 1–6
   write-up (Week 7 deliverable) covering every implemented agent/solver, all key
   numeric results pulled directly from `results/tables/*.csv` (baseline tournament,

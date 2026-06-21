@@ -21,11 +21,11 @@
     guarantee is \(O(1/\sqrt{T})\)) — the log–log decay line is straight over four decades.</li>
 </ul>
 <div class="figure">
-  <img src="/figures/week02_rps_average_strategy_seed0.png" alt="RPS strategy convergence">
+  <img src="{{ base }}/figures/week02_rps_average_strategy_seed0.png" alt="RPS strategy convergence">
   <figcaption>Average strategy convergence (seed 0): the early bias decays into the equilibrium.</figcaption>
 </div>
 <div class="figure">
-  <img src="/figures/week02_rps_average_regret_seed0.png" alt="RPS regret decay">
+  <img src="{{ base }}/figures/week02_rps_average_regret_seed0.png" alt="RPS regret decay">
   <figcaption>Average regret \(R_T/T\) decay, log–log (seed 0).</figcaption>
 </div>
 
@@ -36,7 +36,7 @@
   \(O(1/\sqrt{T})\)–to–\(O(1/T)\), reaching <strong>2.3×10⁻³</strong> chips/hand at 10,000 iterations.
 </p>
 <div class="figure">
-  <img src="/figures/week03_cfr_convergence.png" alt="CFR convergence vs OpenSpiel">
+  <img src="{{ base }}/figures/week03_cfr_convergence.png" alt="CFR convergence vs OpenSpiel">
   <figcaption>Our vanilla CFR vs OpenSpiel's reference solver.</figcaption>
 </div>
 
@@ -57,16 +57,16 @@
   entries stay exactly zero while CFR accumulates negative regret indefinitely.
 </p>
 <div class="figure">
-  <img src="/figures/week04_exploitability_vs_iterations.png" alt="CFR vs CFR+ exploitability">
+  <img src="{{ base }}/figures/week04_exploitability_vs_iterations.png" alt="CFR vs CFR+ exploitability">
   <figcaption>Average and current strategy exploitability, CFR vs CFR+, log–log.</figcaption>
 </div>
 <div class="figure">
-  <img src="/figures/week04_current_strategy_trace.png" alt="current strategy trace">
+  <img src="{{ base }}/figures/week04_current_strategy_trace.png" alt="current strategy trace">
   <figcaption>Current-strategy P(bet) at Player 1's opening infosets: CFR+ (solid) locks onto the
   equilibrium; CFR (dotted) oscillates forever.</figcaption>
 </div>
 <div class="figure">
-  <img src="/figures/week04_zero_regret_fraction.png" alt="zero regret fraction">
+  <img src="{{ base }}/figures/week04_zero_regret_fraction.png" alt="zero regret fraction">
   <figcaption>Fraction of cumulative-regret entries exactly zero (Tammelin §3 compressibility).</figcaption>
 </div>
 
@@ -83,7 +83,7 @@
   <tr><td>ES-MCCFR</td><td>50,000</td><td>2.5×10⁻³ (3-seed mean)</td><td>7.3×10⁵</td></tr>
 </table>
 <div class="figure">
-  <img src="/figures/week04b_exploitability_vs_nodes.png" alt="MCCFR comparison by nodes touched">
+  <img src="{{ base }}/figures/week04b_exploitability_vs_nodes.png" alt="MCCFR comparison by nodes touched">
   <figcaption>Paper-style comparison (Lanctot et al. Figure 1): exploitability vs nodes touched.
   Thin lines are individual MCCFR seeds; bold is the mean.</figcaption>
 </div>
@@ -104,5 +104,46 @@
   at 10/100/1,000/10,000 iterations ours reads 2.9×10⁻²/9.6×10⁻⁴/7.1×10⁻⁵/9.1×10⁻⁶ vs OpenSpiel's
   3.3×10⁻²/1.2×10⁻³/8.7×10⁻⁵/9.6×10⁻⁶.
 </p>
+
+<h2>Leduc Poker: scaling CFR/CFR+ and MCCFR (Weeks 5–6)</h2>
+<p>
+  Leduc Poker has 9,457 game-tree nodes and 936 information sets — 394&times; and 78&times; larger than
+  Kuhn, respectively — and all four solvers run on it with <strong>zero code changes</strong> (they were
+  already game-agnostic). CFR+'s exploitability win over vanilla CFR <strong>grows</strong> with game
+  size: 255&times; on Kuhn &rarr; <strong>2,164&times; on Leduc</strong> at 10,000 iterations.
+</p>
+<table class="tbl">
+  <tr><th>Metric @ 10,000 iterations</th><th>Vanilla CFR</th><th>CFR+</th></tr>
+  <tr><td>Average-strategy exploitability</td><td>1.04×10⁻²</td><td><strong>4.82×10⁻⁶ (≈2,164× better)</strong></td></tr>
+  <tr><td>Current-strategy exploitability</td><td>1.10×10⁰ (oscillates)</td><td><strong>2.06×10⁻³ (decaying)</strong></td></tr>
+</table>
+<div class="figure">
+  <img src="{{ base }}/figures/week05_exploitability_vs_iterations.png" alt="Leduc CFR vs CFR+ exploitability">
+  <figcaption>Average and current strategy exploitability, CFR vs CFR+, log–log, on Leduc.</figcaption>
+</div>
+<div class="figure">
+  <img src="{{ base }}/figures/week05_zero_regret_fraction.png" alt="Leduc zero regret fraction">
+  <figcaption>Fraction of cumulative-regret entries exactly zero — the compressibility claim
+  reproduces at this scale too.</figcaption>
+</div>
+<p>
+  The full 4-way comparison (CFR, CFR+, OS-MCCFR, ES-MCCFR) by nodes touched mirrors the honest finding
+  from Kuhn, now at a larger scale: full-traversal solvers remain more node-efficient than MCCFR on a
+  game this size, though the gap between sampling and full traversal narrows as the tree grows.
+</p>
+<div class="figure">
+  <img src="{{ base }}/figures/week06_exploitability_vs_nodes.png" alt="Leduc 4-way MCCFR comparison by nodes touched">
+  <figcaption>Exploitability vs nodes touched: CFR, CFR+, OS-MCCFR, ES-MCCFR on Leduc.</figcaption>
+</div>
+<p>
+  Both CFR and CFR+ (5,000 iterations each) dominate all five baseline agents in a 7-agent round-robin
+  tournament, by almost identical margins, and are statistically indistinguishable head-to-head
+  (mean −0.00058 chips/hand, <em>not</em> significant) — both have already converged to an
+  effectively Nash-equivalent strategy at this budget.
+</p>
+<div class="figure">
+  <img src="{{ base }}/figures/week06_leduc_payoff_matrix.png" alt="Leduc 7-agent tournament payoff matrix">
+  <figcaption>7-agent round-robin payoff matrix on Leduc Poker.</figcaption>
+</div>
 
 {% endblock %}

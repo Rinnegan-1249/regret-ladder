@@ -14,6 +14,12 @@ results/checkpoints/*
 # Website bot-policy cache (regenerated on first launch)
 web/cache/
 
+# Static GitHub Pages export build output / deploy worktree (see
+# scripts/build_static_site.py, scripts/deploy_gh_pages.py) - deployed via
+# the gh-pages branch, not committed on main.
+.gh-pages-build/
+.gh-pages-worktree/
+
 # OS / editor
 .DS_Store
 .vscode/

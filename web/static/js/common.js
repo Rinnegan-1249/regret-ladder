@@ -70,6 +70,25 @@ function consumeSSE(url, onEvent, onDone, onError) {
   return controller;
 }
 
+// Replay a precomputed array of checkpoint events (the static-site
+// equivalent of consumeSSE): same onEvent/onDone/onError callback shape, so
+// callers don't need to know whether they're live-streaming or replaying.
+// Returns an object with .abort(), matching consumeSSE's return shape.
+function replayCheckpoints(events, onEvent, onDone, intervalMs) {
+  let i = 0;
+  let stopped = false;
+  const timer = setInterval(() => {
+    if (stopped) return;
+    if (i >= events.length) {
+      clearInterval(timer);
+      if (onDone) onDone();
+      return;
+    }
+    onEvent(events[i++]);
+  }, intervalMs || 25);
+  return { abort: () => { stopped = true; clearInterval(timer); } };
+}
+
 function setStatus(el, text, isError) {
   el.textContent = text;
   el.classList.toggle("error", !!isError);

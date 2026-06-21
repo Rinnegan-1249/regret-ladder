@@ -27,40 +27,41 @@
     <div class="step"><span class="rung">Rung 2</span><span class="what">Regret matching on Rock–Paper–Scissors (Hart &amp; Mas-Colell 2000)</span></div>
     <div class="step"><span class="rung">Rung 3</span><span class="what">Vanilla CFR on Kuhn Poker (Zinkevich et al. 2007)</span></div>
     <div class="step"><span class="rung">Rung 4</span><span class="what">CFR+ (Tammelin 2014) and Monte Carlo CFR (Lanctot et al. 2009)</span></div>
-    <div class="step todo"><span class="rung">Next</span><span class="what">Leduc Poker, abstraction, simplified Hold'em</span></div>
+    <div class="step"><span class="rung">Rung 5</span><span class="what">Scaling the full CFR family to Leduc Poker</span></div>
+    <div class="step todo"><span class="rung">Next</span><span class="what">Abstraction, simplified Hold'em</span></div>
   </div>
 </div>
 
 <h2><span class="secnum">02 /</span>Explore</h2>
 <div class="gallery">
-  <a class="game-card" href="/games">
+  <a class="game-card" href="{{ base }}/games">
     <h3>&#127918; Games</h3>
-    <p>Play Rock–Paper–Scissors and Kuhn Poker against the project's actual trained bots — including an
-    adaptive bot that learns from your play — and watch every algorithm train live, streamed from the
-    real solvers.</p>
+    <p>Play Rock–Paper–Scissors, Kuhn Poker, and Leduc Poker against the project's actual trained bots —
+    including an adaptive bot that learns from your play — and watch every algorithm train, streamed
+    from the real solvers.</p>
     <div class="go">Pick a game &rarr;</div>
   </a>
-  <a class="game-card" href="/foundations">
+  <a class="game-card" href="{{ base }}/foundations">
     <h3>&#128208; Foundations</h3>
     <p>The game model under everything: extensive-form games with imperfect information — histories,
     information sets, perfect recall, reach probabilities, Nash equilibria, and exploitability as the
     honest yardstick.</p>
     <div class="go">Read the model &rarr;</div>
   </a>
-  <a class="game-card" href="/regret">
+  <a class="game-card" href="{{ base }}/regret">
     <h3>&#128201; Regret</h3>
     <p>The learning machinery, paper by paper: external regret and the folk theorem, regret matching
     (Hart &amp; Mas-Colell), counterfactual regret and its decomposition theorem (Zinkevich et al.),
     then CFR+ and sampled counterfactual values (MCCFR).</p>
     <div class="go">Climb the theory &rarr;</div>
   </a>
-  <a class="game-card" href="/results">
+  <a class="game-card" href="{{ base }}/results">
     <h3>&#128202; Results</h3>
     <p>Every figure from the project's seeded experiments: Nash convergence on RPS, the CFR-vs-OpenSpiel
     validation, CFR+'s 255&times; exploitability win, and the honest MCCFR game-size story.</p>
     <div class="go">See the evidence &rarr;</div>
   </a>
-  <a class="game-card" href="/references">
+  <a class="game-card" href="{{ base }}/references">
     <h3>&#128218; References</h3>
     <p>The primary literature, with the three driving papers attached as PDFs — Zinkevich et al. 2007,
     Lanctot et al. 2009, Tammelin 2014 — plus the regret-matching and approachability classics.</p>
@@ -70,5 +71,5 @@
 
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/hero.js?v={{ v }}"></script>
+<script src="{{ base }}/static/js/hero.js?v={{ v }}"></script>
 {% endblock %}

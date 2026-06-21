@@ -12,6 +12,18 @@
   let match = null; // {id, seats, finished}
   let streak = 0;   // P1 perspective
 
+  // Static (GitHub Pages) builds have no server: route through the
+  // client-side engine in rps_engine.js instead of the live /api/rps/* calls.
+  function rpsNew(body) {
+    return window.STATIC_MODE ? window.RpsClient.new_match(body) : postJSON("/api/rps/new", body);
+  }
+  function rpsPlayRound(matchId, body) {
+    return window.STATIC_MODE ? window.RpsClient.play(matchId, body) : postJSON(`/api/rps/${matchId}/play`, body);
+  }
+  function rpsAutoRun(matchId) {
+    return window.STATIC_MODE ? window.RpsClient.auto(matchId) : postJSON(`/api/rps/${matchId}/auto`);
+  }
+
   const HANDS = ["✊", "✋", "✌️"]; // rock, paper, scissors emoji
   const ACTION_NAMES = ["Rock", "Paper", "Scissors"];
 
@@ -178,7 +190,7 @@
   }
 
   async function playRound(a1, a2) {
-    const data = await postJSON(`/api/rps/${match.id}/play`, { p1_action: a1, p2_action: a2 });
+    const data = await rpsPlayRound(match.id, { p1_action: a1, p2_action: a2 });
     const humans = humanSeats();
     appendLog(data.round);
     appendHistoryDot(data.round.p1_payoff);
@@ -198,7 +210,7 @@
     if (body.p1.kind === "distribution") body.p1.dist = distOf("p1");
     if (body.p2.kind === "distribution") body.p2.dist = distOf("p2");
     try {
-      const summary = await postJSON("/api/rps/new", body);
+      const summary = await rpsNew(body);
       match = { id: summary.match_id, seats: summary.seats, finished: false };
       streak = 0;
       el("rps-game").style.display = "";
@@ -233,7 +245,7 @@
   el("rps-autorun").addEventListener("click", async () => {
     try {
       el("rps-autorun").disabled = true;
-      const data = await postJSON(`/api/rps/${match.id}/auto`);
+      const data = await rpsAutoRun(match.id);
       data.rounds.forEach((r) => { appendLog(r); appendHistoryDot(r.p1_payoff); });
       if (data.rounds.length) {
         showAdaptive(data.rounds[data.rounds.length - 1]);

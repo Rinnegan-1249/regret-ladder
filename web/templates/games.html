@@ -12,7 +12,7 @@
 </div>
 
 <div class="gallery">
-  <a class="game-card" href="/rps">
+  <a class="game-card" href="{{ base }}/rps">
     <h3>&#9994; Rock–Paper–Scissors</h3>
     <p style="color:var(--muted); font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase">
       Normal-form &middot; zero-sum &middot; one information set</p>
@@ -25,7 +25,7 @@
     <div class="go">Enter the arena &rarr;</div>
   </a>
 
-  <a class="game-card" href="/kuhn">
+  <a class="game-card" href="{{ base }}/kuhn">
     <h3>&#127136; Kuhn Poker</h3>
     <p style="color:var(--muted); font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase">
       Extensive-form &middot; imperfect information &middot; 12 information sets</p>
@@ -38,20 +38,23 @@
     <div class="go">Take a seat &rarr;</div>
   </a>
 
-  <div class="game-card" style="opacity:0.55; cursor:default">
+  <a class="game-card" href="{{ base }}/leduc">
     <h3>&#127183; Leduc Poker</h3>
     <p style="color:var(--muted); font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase">
       Extensive-form &middot; two betting rounds &middot; public board card</p>
-    <p>The next rung: a 6-card deck, a public board card, and two betting rounds — large enough that the
-    MCCFR sampling variants finally show their asymptotic advantage over full-traversal CFR.</p>
-    <div class="go" style="color:var(--muted)">Coming with Week 5 &rarr;</div>
-  </div>
+    <p>The next rung: a 6-card deck, a public board card, and two betting rounds — 936 information sets,
+    78&times; more than Kuhn. CFR+'s exploitability win over vanilla CFR grows from 255&times; on Kuhn
+    to 2,164&times; here.</p>
+    <p style="font-size:0.9rem; color:var(--muted)"><strong>Algorithms:</strong> vanilla CFR, CFR+
+    (trained bots); full 4-way MCCFR comparison in the training view.</p>
+    <div class="go">Take a seat &rarr;</div>
+  </a>
 </div>
 
 <div class="note">
-  Before playing, the <a href="/foundations">Foundations</a> section defines the game model these bots
-  operate on, and the <a href="/regret">Regret</a> section develops the learning machinery they run —
-  from plain regret matching to counterfactual regret minimization.
+  Before playing, the <a href="{{ base }}/foundations">Foundations</a> section defines the game model
+  these bots operate on, and the <a href="{{ base }}/regret">Regret</a> section develops the learning
+  machinery they run — from plain regret matching to counterfactual regret minimization.
 </div>
 
 {% endblock %}

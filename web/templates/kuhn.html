@@ -25,7 +25,7 @@
     players ante 1 chip; each is dealt one private card. A single betting round follows with bet size 1:
   </p>
   <div class="figure dark">
-    <img src="/static/img/kuhn_tree.svg" alt="Kuhn poker betting tree" style="max-width:740px">
+    <img src="{{ base }}/static/img/kuhn_tree.svg" alt="Kuhn poker betting tree" style="max-width:740px">
     <figcaption>The full betting tree after the deal. "p" = pass/check/fold, "b" = bet/call.</figcaption>
   </div>
   <p>
@@ -54,12 +54,29 @@
     probability \(\alpha\), holding the King with probability \(3\alpha\), and never with the Queen.
     The game value is \(-\tfrac{1}{18}\) chips/hand for Player 1. Our CFR+ run recovers a member of
     this family <em>exactly</em>: \(\alpha = 0.2226\), \(P(\text{bet}\,|\,K) = 0.6678 = 3\alpha\)
-    (see <a href="/results">Results</a>).
+    (see <a href="{{ base }}/results">Results</a>).
   </p>
 </div>
 
 <!-- ============================== PLAY ============================== -->
 <div class="tabpane" id="pane-kplay">
+  {% if static_mode %}
+  <h3 style="margin-top:0">Watch a recorded hand</h3>
+  <div class="controls">
+    <div class="field">Recorded match
+      <select id="k-walk-pick">
+        {% for w in walkthroughs %}<option value="{{ w.id }}">{{ w.label }}</option>{% endfor %}
+      </select>
+    </div>
+    <button class="primary" id="k-walk-start">Watch</button>
+  </div>
+  <div class="note">
+    Interactive play needs a server to track hidden game state (whose card is whose, who acts next),
+    which a static GitHub Pages site can't do. Instead, step forward and back with the buttons below
+    through a few hands the trained CFR+ bot actually played, exactly as the live version would have
+    shown them.
+  </div>
+  {% else %}
   <h3 style="margin-top:0">Set up a match</h3>
   <div class="controls">
     <div class="field">Player 1
@@ -83,9 +100,17 @@
     card; the opponent's card is revealed only at showdown — folds end the hand without a reveal.
     Human matches are capped at 200 hands; bot-vs-bot simulations at 10,000.
   </div>
+  {% endif %}
   <div class="status" id="k-status"></div>
 
   <div id="k-game" style="display:none">
+    {% if static_mode %}
+    <div class="controls">
+      <button id="k-walk-prev">&larr; Prev</button>
+      <span id="k-walk-step-label" class="card-label"></span>
+      <button id="k-walk-next">Next &rarr;</button>
+    </div>
+    {% endif %}
     <div class="scoreboard">
       <div><div class="score" id="k-total1">0</div><div class="who" id="k-who1">Player 1 chips</div></div>
       <div><div class="score" id="k-total2">0</div><div class="who" id="k-who2">Player 2 chips</div></div>
@@ -184,7 +209,7 @@
   <p>
     CFR traverses the full game tree each iteration, computing at every information set \(I\) the
     counterfactual values \(v_i(\sigma^t, I)\) and \(v_i(\sigma^t_{(I \to a)}, I)\)
-    (see the <a href="/regret">Regret section</a>), accumulating regrets, and setting the next strategy
+    (see the <a href="{{ base }}/regret">Regret section</a>), accumulating regrets, and setting the next strategy
     by regret matching.
     By Theorem 2 (regret decomposition) the overall regret is bounded by the per-information-set sums,
     and Theorem 1 turns vanishing regret into an approximate Nash equilibrium of the
@@ -207,7 +232,7 @@
   </ol>
   <p>
     Empirically CFR+'s <em>current</em> strategy also (nearly) converges — vanilla CFR's never does —
-    which we reproduce in the live-training tab and in <a href="/results">Results</a>.
+    which we reproduce in the live-training tab and in <a href="{{ base }}/results">Results</a>.
   </p>
 
   <h3>Monte Carlo CFR (Lanctot et al. 2009 [2])</h3>
@@ -245,6 +270,6 @@
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="/static/js/kuhn.js?v={{ v }}"></script>
-<script src="/static/js/training.js?v={{ v }}"></script>
+<script src="{{ base }}/static/js/kuhn.js?v={{ v }}"></script>
+<script src="{{ base }}/static/js/training.js?v={{ v }}"></script>
 {% endblock %}

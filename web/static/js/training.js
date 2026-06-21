@@ -24,6 +24,36 @@ function mergeAxes(layout, x, y) {
 
 const PLOT_CONFIG = { displayModeBar: false, responsive: true };
 
+// In static (GitHub Pages) builds there's no SSE server: fetch a precomputed
+// checkpoint-array JSON once and replay it on the same onEvent/onDone/onError
+// callbacks consumeSSE uses, so the render functions below don't need to
+// know which transport is active. Falls back to the live SSE endpoint
+// otherwise. Returns a controller with .abort(), like consumeSSE.
+function startReplayOrLive(liveUrl, staticUrl, onEvent, onDone, onError) {
+  if (window.STATIC_MODE) {
+    let aborted = false;
+    let inner = null;
+    fetch(`${window.SITE_BASE || ""}${staticUrl}`)
+      .then((r) => r.json())
+      .then((data) => { if (!aborted) inner = replayCheckpoints(data.events, onEvent, onDone); })
+      .catch((err) => { if (!aborted && onError) onError(err); });
+    return { abort: () => { aborted = true; if (inner) inner.abort(); } };
+  }
+  return consumeSSE(liveUrl, onEvent, onDone, onError);
+}
+
+// Leduc training has no live SSE counterpart at all (see web/templates/leduc.html) —
+// it always replays a precomputed checkpoint array fetched from staticUrl.
+function replayCheckpointsFromUrl(staticUrl, onEvent, onDone, onError) {
+  let aborted = false;
+  let inner = null;
+  fetch(`${window.SITE_BASE || ""}${staticUrl}`)
+    .then((r) => r.json())
+    .then((data) => { if (!aborted) inner = replayCheckpoints(data.events, onEvent, onDone); })
+    .catch((err) => { if (!aborted && onError) onError(err); });
+  return { abort: () => { aborted = true; if (inner) inner.abort(); } };
+}
+
 (() => {
   const el = (id) => document.getElementById(id);
 
@@ -83,19 +113,27 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
       if (stream) stream.abort();
       data = { t: [], p1: [[], [], []], p2: [[], [], []], r1: [], r2: [] };
       const T = +el("rps-train-T").value, seed = +el("rps-train-seed").value;
-      setStatus(el("rps-train-status"), "Training…");
-      stream = consumeSSE(`/api/train/rps/stream?iterations=${T}&seed=${seed}`, (ev) => {
-        if (ev.type !== "checkpoint") return;
-        data.t.push(ev.t);
-        for (let i = 0; i < 3; i++) { data.p1[i].push(ev.p1_avg[i]); data.p2[i].push(ev.p2_avg[i]); }
-        data.r1.push(Math.max(ev.p1_avg_regret, 1e-12));
-        data.r2.push(Math.max(ev.p2_avg_regret, 1e-12));
-        renderRps();
-        setStatus(el("rps-train-status"), `Iteration ${ev.t.toLocaleString()} / ${T.toLocaleString()}`);
-      }, () => {
-        renderRps();
-        setStatus(el("rps-train-status"), "Done — strategies converged toward (1/3, 1/3, 1/3).");
-      }, (err) => setStatus(el("rps-train-status"), err.message, true));
+      let total = T; // overwritten by the "start" event - matters in static
+                      // mode, where the replay's actual iteration count is
+                      // fixed by the precomputed file, not this input.
+      setStatus(el("rps-train-status"),
+        window.STATIC_MODE ? "Replaying precomputed training run…" : "Training…");
+      stream = startReplayOrLive(
+        `/api/train/rps/stream?iterations=${T}&seed=${seed}`,
+        "/static/data/training/rps.json",
+        (ev) => {
+          if (ev.type === "start") { total = ev.iterations || total; return; }
+          if (ev.type !== "checkpoint") return;
+          data.t.push(ev.t);
+          for (let i = 0; i < 3; i++) { data.p1[i].push(ev.p1_avg[i]); data.p2[i].push(ev.p2_avg[i]); }
+          data.r1.push(Math.max(ev.p1_avg_regret, 1e-12));
+          data.r2.push(Math.max(ev.p2_avg_regret, 1e-12));
+          renderRps();
+          setStatus(el("rps-train-status"), `Iteration ${ev.t.toLocaleString()} / ${total.toLocaleString()}`);
+        }, () => {
+          renderRps();
+          setStatus(el("rps-train-status"), "Done — strategies converged toward (1/3, 1/3, 1/3).");
+        }, (err) => setStatus(el("rps-train-status"), err.message, true));
     });
   }
 
@@ -164,8 +202,14 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
       kd = { t: [], expl: [], infosets: { p1: {}, p2: {} } };
       const algo = el("kuhn-train-algo").value;
       const T = +el("kuhn-train-T").value, seed = +el("kuhn-train-seed").value;
-      setStatus(el("kuhn-train-status"), "Training…");
-      stream = consumeSSE(`/api/train/kuhn/stream?algo=${algo}&iterations=${T}&seed=${seed}`, (ev) => {
+      let total = T; // see RPS block above - overwritten by the "start" event.
+      setStatus(el("kuhn-train-status"),
+        window.STATIC_MODE ? "Replaying precomputed training run…" : "Training…");
+      stream = startReplayOrLive(
+        `/api/train/kuhn/stream?algo=${algo}&iterations=${T}&seed=${seed}`,
+        `/static/data/training/kuhn_${algo}.json`,
+        (ev) => {
+        if (ev.type === "start") { total = ev.iterations || total; return; }
         if (ev.type !== "checkpoint") return;
         kd.t.push(ev.t);
         kd.expl.push(ev.exploitability);
@@ -180,11 +224,68 @@ const PLOT_CONFIG = { displayModeBar: false, responsive: true };
         }
         renderKuhn();
         setStatus(el("kuhn-train-status"),
-          `Iteration ${ev.t.toLocaleString()} / ${T.toLocaleString()} — exploitability ${ev.exploitability.toExponential(2)}`);
+          `Iteration ${ev.t.toLocaleString()} / ${total.toLocaleString()} — exploitability ${ev.exploitability.toExponential(2)}`);
       }, () => {
         renderKuhn();
         setStatus(el("kuhn-train-status"), "Done.");
       }, (err) => setStatus(el("kuhn-train-status"), err.message, true));
+    });
+  }
+
+  /* ---------------- Leduc training replay (always precomputed) ---------------- */
+  if (el("leduc-train-start")) {
+    let ld = { t: [], cfrExpl: [], cfrplusExpl: [], cfrZero: [], cfrplusZero: [] };
+    let stream = null;
+
+    function leducExplLayout() {
+      return mergeAxes(darkLayout({ title: { text: "Exploitability of the average strategy (log–log)" } }),
+        { type: "log", title: { text: "Iteration" } },
+        { type: "log", title: { text: "Exploitability" } });
+    }
+    function leducZeroRegLayout() {
+      return mergeAxes(darkLayout({ title: { text: "Fraction of regret entries exactly zero" }, height: 320 }),
+        { type: "log", title: { text: "Iteration" } },
+        { title: { text: "Fraction" }, range: [0, 1] });
+    }
+
+    function renderLeduc() {
+      try {
+        Plotly.react("leduc-expl-chart", [
+          { x: ld.t.slice(), y: ld.cfrExpl.slice(), mode: "lines", name: "CFR", line: { color: "#f87171", width: 2 } },
+          { x: ld.t.slice(), y: ld.cfrplusExpl.slice(), mode: "lines", name: "CFR+", line: { color: "#34e3a4", width: 2 } },
+        ], leducExplLayout(), PLOT_CONFIG);
+        Plotly.react("leduc-zeroreg-chart", [
+          { x: ld.t.slice(), y: ld.cfrZero.slice(), mode: "lines", name: "CFR", line: { color: "#f87171", width: 2 } },
+          { x: ld.t.slice(), y: ld.cfrplusZero.slice(), mode: "lines", name: "CFR+", line: { color: "#34e3a4", width: 2 } },
+        ], leducZeroRegLayout(), PLOT_CONFIG);
+      } catch (err) {
+        setStatus(el("leduc-train-status"), `Chart error: ${err.message}`, true);
+      }
+    }
+
+    function placeholders() {
+      Plotly.react("leduc-expl-chart", [], leducExplLayout(), PLOT_CONFIG);
+      Plotly.react("leduc-zeroreg-chart", [], leducZeroRegLayout(), PLOT_CONFIG);
+    }
+    window.leducTrainPlaceholders = () => { if (!ld.t.length) placeholders(); };
+
+    el("leduc-train-start").addEventListener("click", () => {
+      if (stream) stream.abort();
+      ld = { t: [], cfrExpl: [], cfrplusExpl: [], cfrZero: [], cfrplusZero: [] };
+      setStatus(el("leduc-train-status"), "Replaying the validated 10,000-iteration training run…");
+      stream = replayCheckpointsFromUrl("/static/data/training/leduc.json", (ev) => {
+        if (ev.type !== "checkpoint") return;
+        ld.t.push(ev.t);
+        ld.cfrExpl.push(Math.max(ev.cfr_expl, 1e-12));
+        ld.cfrplusExpl.push(Math.max(ev.cfrplus_expl, 1e-12));
+        ld.cfrZero.push(ev.cfr_zero_regret_frac);
+        ld.cfrplusZero.push(ev.cfrplus_zero_regret_frac);
+        renderLeduc();
+        setStatus(el("leduc-train-status"), `Iteration ${ev.t.toLocaleString()} / 10,000`);
+      }, () => {
+        renderLeduc();
+        setStatus(el("leduc-train-status"), "Done.");
+      }, (err) => setStatus(el("leduc-train-status"), err.message, true));
     });
   }
 })();
