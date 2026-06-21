@@ -68,11 +68,13 @@ terminology / simplified Hold'em / abstraction. Full Texas Hold'em is out of sco
 ## Layout (see docs/repo_structure.md for detail)
 
 - `poker_ai/` — installed package (`pip install -e .`), all reusable code:
-  `agents/` (baselines, `regret_matching.py`, `cfr.py`, `cfr_plus.py`, `openspiel_solver.py`),
+  `agents/` (baselines, `regret_matching.py`, `regret_matching_plus.py`, `cfr.py`,
+  `cfr_plus.py`, `mccfr_outcome.py`, `mccfr_external.py`, `openspiel_solver.py`),
   `env/rps.py`, `evaluation/` (`tournament.py`, `exploitability.py`, `stats.py`),
   `utils/seeding.py`.
 - `experiments/` — weekly deliverables (exp01=W1, exp02=W2, exp03=W3, exp04/04b=W4,
-  exp05=W5, exp06×2=W6). Run from repo root.
+  exp05=W5, exp06×2=W6, exp07×2=RPS CFR+ / full Kuhn tournament, ad hoc). Run from
+  repo root.
 - `scripts/` — demos, human-play, report generators, `validate_week3/4/4b/5/6.py`.
 - `tests/` — pytest sanity tests (41 passing as of 2026-06-20; `test_leduc_smoke.py` covers
   all 4 solvers on Leduc).
@@ -177,6 +179,19 @@ only pushed to `main` for the Render deployment to pick up.
 
 ## Progress log
 
+- **2026-06-21 (latest #3)** — Implemented CFR+ (regret-matching+) for RPS
+  (`poker_ai/agents/regret_matching_plus.py`, `RegretMatchingPlusAgent`: floored
+  regrets + linear-weighted averaging, the CFR+ idea applied to a single-infoset
+  normal-form game — additive, doesn't touch `RegretMatchingAgent`). New experiment
+  `experiments/exp07_rps_cfrplus.py` (RM vs CFR+ exploitability + an exact-payoff
+  3-way round-robin: Uniform/RM/CFR+) and `experiments/exp07_kuhn_full_tournament.py`
+  (first-ever 9-bot Kuhn cross-table: all 5 baselines + CFR + CFR+ + OS-MCCFR +
+  ES-MCCFR together). Wrote `reports/Exploitability_and_Tournament_Report.md`:
+  per-game (RPS/Kuhn/Leduc) exploitability vs OpenSpiel with iteration counts,
+  abbreviated round-robin tables for every bot built per game, and the cross-game
+  finding that CFR+'s exploitability advantage over vanilla CFR grows with
+  information-set count (1.76× on RPS → 255× on Kuhn → 2,164× on Leduc). 44/44 tests
+  pass (3 new, for `RegretMatchingPlusAgent`).
 - **2026-06-21 (latest #2)** — Fixed the live GitHub Pages deploy: a Git-Bash MSYS
   path-mangling bug had turned `--base /regret-ladder` into a literal Windows path,
   breaking every link and asset load on the live site (looked unstyled, every nav/

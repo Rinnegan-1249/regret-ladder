@@ -1,5 +1,19 @@
 # Reminders — things to review manually
 
+## From the 2026-06-21 session (CFR+ on RPS + exploitability/tournament report)
+
+- [ ] **Review `reports/Exploitability_and_Tournament_Report.md`** before treating it
+  as final — new RPS CFR+ implementation, fresh 9-bot Kuhn round-robin, and
+  reorganized exploitability-vs-OpenSpiel numbers for all 3 games.
+- [ ] **`RegretMatchingPlusAgent` (RPS CFR+) isn't wired into the website** — it
+  exists only in `poker_ai/agents/regret_matching_plus.py` and the new
+  `experiments/exp07_rps_cfrplus.py`. Decide if it should become an RPS bot option on
+  the site (`web/bots.py`, `rps_engine.py`) the way Kuhn/Leduc's CFR-family bots are.
+- [ ] **`week07_kuhn_full_tournament_*` files are new, separate from `week03_*`** —
+  the original 7-agent week03 tournament (CFR vs OpenSpiel's CFR only) is still
+  committed unchanged; the new 9-agent one lives alongside it. Decide if the old one
+  should be superseded/removed or kept as a distinct artifact.
+
 ## From the 2026-06-21 session (Leduc live play — Render only)
 
 - [ ] **Confirm Render redeploys from `main`.** Pushed `web/leduc_engine.py` (new),
