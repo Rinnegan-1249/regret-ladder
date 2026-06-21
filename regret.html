@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029260">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -17,12 +17,12 @@
 <body>
 <nav>
   <div class="brand">Regret <span>Ladder</span></div>
-  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
-  <a href="C:/Program Files/Git/regret-ladder/games" class="">Games</a>
-  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
-  <a href="C:/Program Files/Git/regret-ladder/regret" class="active">Regret</a>
-  <a href="C:/Program Files/Git/regret-ladder/results" class="">Results</a>
-  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+  <a href="/regret-ladder/" class="">Home</a>
+  <a href="/regret-ladder/games" class="">Games</a>
+  <a href="/regret-ladder/foundations" class="">Foundations</a>
+  <a href="/regret-ladder/regret" class="active">Regret</a>
+  <a href="/regret-ladder/results" class="">Results</a>
+  <a href="/regret-ladder/references" class="">References</a>
 </nav>
 <main>
 
@@ -71,7 +71,7 @@
   <strong>Observability.</strong> Crucially, the procedure is defined from <em>realized play only</em>:
   after the opponent's action \(b_t\) is revealed, the full counterfactual payoff vector
   \(u(\cdot, b_t)\) is computable — no knowledge of the opponent's mixed strategy is needed. That is
-  what licenses the <a href="C:/Program Files/Git/regret-ladder/rps">adaptive RPS bot</a> to learn against <em>you</em>; self-play with
+  what licenses the <a href="/regret-ladder/rps">adaptive RPS bot</a> to learn against <em>you</em>; self-play with
   expected-utility updates (used in our Week 2 experiment for smoother convergence) is the special case
   where the opponent's distribution is known.
 </div>
@@ -121,19 +121,19 @@
   at \(O(\sqrt{|H|})\) per-iteration cost (Thm. 4).
 </p>
 <p>
-  The full per-algorithm treatments live with their game: <a href="C:/Program Files/Git/regret-ladder/rps">regret matching → RPS</a>,
-  <a href="C:/Program Files/Git/regret-ladder/kuhn">CFR / CFR+ / MCCFR → Kuhn Poker</a>; measured outcomes are on the
-  <a href="C:/Program Files/Git/regret-ladder/results">Results</a> page.
+  The full per-algorithm treatments live with their game: <a href="/regret-ladder/rps">regret matching → RPS</a>,
+  <a href="/regret-ladder/kuhn">CFR / CFR+ / MCCFR → Kuhn Poker</a>; measured outcomes are on the
+  <a href="/regret-ladder/results">Results</a> page.
 </p>
 
 <h2><span class="secnum">05 /</span>Reading order</h2>
 <table class="tbl">
   <tr><th>Step</th><th>Paper</th><th>What it gives you</th></tr>
-  <tr><td>1</td><td>Blackwell 1956 <a href="C:/Program Files/Git/regret-ladder/references">[6]</a></td><td>approachability — why no-regret is possible at all</td></tr>
-  <tr><td>2</td><td>Hart &amp; Mas-Colell 2000 <a href="C:/Program Files/Git/regret-ladder/references">[4]</a></td><td>regret matching from realized play</td></tr>
-  <tr><td>3</td><td>Zinkevich et al. 2007 <a href="C:/Program Files/Git/regret-ladder/references">[1]</a></td><td>counterfactual values, the decomposition theorem, vanilla CFR</td></tr>
-  <tr><td>4</td><td>Lanctot et al. 2009 <a href="C:/Program Files/Git/regret-ladder/references">[2]</a></td><td>sampled counterfactual values, OS/ES-MCCFR, tighter bounds</td></tr>
-  <tr><td>5</td><td>Tammelin 2014 <a href="C:/Program Files/Git/regret-ladder/references">[3]</a></td><td>regret-matching+, CFR+</td></tr>
+  <tr><td>1</td><td>Blackwell 1956 <a href="/regret-ladder/references">[6]</a></td><td>approachability — why no-regret is possible at all</td></tr>
+  <tr><td>2</td><td>Hart &amp; Mas-Colell 2000 <a href="/regret-ladder/references">[4]</a></td><td>regret matching from realized play</td></tr>
+  <tr><td>3</td><td>Zinkevich et al. 2007 <a href="/regret-ladder/references">[1]</a></td><td>counterfactual values, the decomposition theorem, vanilla CFR</td></tr>
+  <tr><td>4</td><td>Lanctot et al. 2009 <a href="/regret-ladder/references">[2]</a></td><td>sampled counterfactual values, OS/ES-MCCFR, tighter bounds</td></tr>
+  <tr><td>5</td><td>Tammelin 2014 <a href="/regret-ladder/references">[3]</a></td><td>regret-matching+, CFR+</td></tr>
 </table>
 
 
@@ -142,8 +142,8 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
-<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+<script src="/regret-ladder/static/js/common.js?v=1782029260"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {

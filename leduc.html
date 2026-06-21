@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029260">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -17,12 +17,12 @@
 <body>
 <nav>
   <div class="brand">Regret <span>Ladder</span></div>
-  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
-  <a href="C:/Program Files/Git/regret-ladder/games" class="active">Games</a>
-  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
-  <a href="C:/Program Files/Git/regret-ladder/regret" class="">Regret</a>
-  <a href="C:/Program Files/Git/regret-ladder/results" class="">Results</a>
-  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+  <a href="/regret-ladder/" class="">Home</a>
+  <a href="/regret-ladder/games" class="active">Games</a>
+  <a href="/regret-ladder/foundations" class="">Foundations</a>
+  <a href="/regret-ladder/regret" class="">Regret</a>
+  <a href="/regret-ladder/results" class="">Results</a>
+  <a href="/regret-ladder/references" class="">References</a>
 </nav>
 <main>
 
@@ -163,7 +163,7 @@
   <p>
     Leduc has too many information sets (936) to chart per-infoset bet probabilities the way the Kuhn
     page does, so this replays the headline result from
-    <a href="C:/Program Files/Git/regret-ladder/results">Results</a> instead: exploitability and the zero-regret-entry fraction,
+    <a href="/regret-ladder/results">Results</a> instead: exploitability and the zero-regret-entry fraction,
     CFR vs CFR+, over the actual validated 10,000-iteration training run
     (<code>results/tables/week05_leduc_cfr_variants.csv</code>) — animated checkpoint by checkpoint.
   </p>
@@ -177,7 +177,7 @@
     CFR+'s exploitability win over vanilla CFR <strong>grows</strong> with game size: 255&times; on Kuhn
     &rarr; <strong>2,164&times; on Leduc</strong> at 10,000 iterations — the regret floor matters more as
     more information sets accumulate negative regret that vanilla CFR would otherwise keep oscillating
-    around. See <a href="C:/Program Files/Git/regret-ladder/results">Results</a> for the full 4-way comparison against MCCFR by
+    around. See <a href="/regret-ladder/results">Results</a> for the full 4-way comparison against MCCFR by
     nodes touched.
   </div>
 </div>
@@ -188,7 +188,7 @@
   <p>
     Every solver here — <code>VanillaCFR</code>, <code>CFRPlus</code>, <code>OutcomeSamplingMCCFR</code>,
     <code>ExternalSamplingMCCFR</code> — is the exact same game-agnostic implementation used on Kuhn
-    (see the <a href="C:/Program Files/Git/regret-ladder/kuhn">Kuhn page</a> and <a href="C:/Program Files/Git/regret-ladder/regret">Regret section</a>
+    (see the <a href="/regret-ladder/kuhn">Kuhn page</a> and <a href="/regret-ladder/regret">Regret section</a>
     for the algorithm definitions); pointing them at <code>leduc_poker</code> instead of
     <code>kuhn_poker</code> required <strong>zero solver code changes</strong> — they operate purely
     through OpenSpiel's generic information-state interface.
@@ -199,7 +199,7 @@
     MCCFR's sampling variants narrows — MCCFR needs much larger iteration budgets here (500,000 for
     OS-MCCFR, 100,000 for ES-MCCFR, vs 10,000 for CFR/CFR+) to reach comparable exploitability, since
     sample variance grows with the size of the tree being sampled. See
-    <a href="C:/Program Files/Git/regret-ladder/results">Results</a> for the full numbers.
+    <a href="/regret-ladder/results">Results</a> for the full numbers.
   </p>
 </div>
 </div>
@@ -210,12 +210,12 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
-<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+<script src="/regret-ladder/static/js/common.js?v=1782029260"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/leduc.js?v=1782024649"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/training.js?v=1782024649"></script>
+<script src="/regret-ladder/static/js/leduc.js?v=1782029260"></script>
+<script src="/regret-ladder/static/js/training.js?v=1782029260"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {

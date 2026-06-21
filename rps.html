@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029260">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -17,12 +17,12 @@
 <body>
 <nav>
   <div class="brand">Regret <span>Ladder</span></div>
-  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
-  <a href="C:/Program Files/Git/regret-ladder/games" class="active">Games</a>
-  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
-  <a href="C:/Program Files/Git/regret-ladder/regret" class="">Regret</a>
-  <a href="C:/Program Files/Git/regret-ladder/results" class="">Results</a>
-  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+  <a href="/regret-ladder/" class="">Home</a>
+  <a href="/regret-ladder/games" class="active">Games</a>
+  <a href="/regret-ladder/foundations" class="">Foundations</a>
+  <a href="/regret-ladder/regret" class="">Regret</a>
+  <a href="/regret-ladder/results" class="">Results</a>
+  <a href="/regret-ladder/references" class="">References</a>
 </nav>
 <main>
 
@@ -199,7 +199,7 @@
   <p>
     <strong>Why the average strategy converges to Nash.</strong> In zero-sum self-play, both players'
     average regrets vanish at rate \(O(1/\sqrt{T})\) (with expected updates, in practice \(O(1/T)\) here),
-    so by the folk theorem in the <a href="C:/Program Files/Git/regret-ladder/regret">Regret section</a> the average strategy profile
+    so by the folk theorem in the <a href="/regret-ladder/regret">Regret section</a> the average strategy profile
     converges to the unique Nash equilibrium \((1/3, 1/3, 1/3)\). Note it is the <em>average</em>
     strategy — current strategies cycle.
   </p>
@@ -208,14 +208,14 @@
   <p>
     Five seeded runs of 100,000 expected-update iterations: average strategies converge to within
     \(10^{-3}\) of uniform; average regret decays like \(1/T\) on the log–log plot. Full figures and
-    discussion on the <a href="C:/Program Files/Git/regret-ladder/results">Results page</a>.
+    discussion on the <a href="/regret-ladder/results">Results page</a>.
   </p>
   <div class="figure">
-    <img src="C:/Program Files/Git/regret-ladder/figures/week02_rps_average_strategy_seed0.png" alt="RPS average strategy convergence">
+    <img src="/regret-ladder/figures/week02_rps_average_strategy_seed0.png" alt="RPS average strategy convergence">
     <figcaption>Average strategy convergence to the Nash equilibrium, seed 0.</figcaption>
   </div>
   <div class="figure">
-    <img src="C:/Program Files/Git/regret-ladder/figures/week02_rps_average_regret_seed0.png" alt="RPS average regret decay">
+    <img src="/regret-ladder/figures/week02_rps_average_regret_seed0.png" alt="RPS average regret decay">
     <figcaption>Average regret decay \(R_T/T\), log–log (seed 0): a straight \(\sim 1/T\) line over
     four decades.</figcaption>
   </div>
@@ -228,13 +228,13 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
-<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+<script src="/regret-ladder/static/js/common.js?v=1782029260"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/rps_engine.js?v=1782024649"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/rps.js?v=1782024649"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/training.js?v=1782024649"></script>
+<script src="/regret-ladder/static/js/rps_engine.js?v=1782029260"></script>
+<script src="/regret-ladder/static/js/rps.js?v=1782029260"></script>
+<script src="/regret-ladder/static/js/training.js?v=1782029260"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029260">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -17,12 +17,12 @@
 <body>
 <nav>
   <div class="brand">Regret <span>Ladder</span></div>
-  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
-  <a href="C:/Program Files/Git/regret-ladder/games" class="active">Games</a>
-  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
-  <a href="C:/Program Files/Git/regret-ladder/regret" class="">Regret</a>
-  <a href="C:/Program Files/Git/regret-ladder/results" class="">Results</a>
-  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+  <a href="/regret-ladder/" class="">Home</a>
+  <a href="/regret-ladder/games" class="active">Games</a>
+  <a href="/regret-ladder/foundations" class="">Foundations</a>
+  <a href="/regret-ladder/regret" class="">Regret</a>
+  <a href="/regret-ladder/results" class="">Results</a>
+  <a href="/regret-ladder/references" class="">References</a>
 </nav>
 <main>
 
@@ -50,7 +50,7 @@
     players ante 1 chip; each is dealt one private card. A single betting round follows with bet size 1:
   </p>
   <div class="figure dark">
-    <img src="C:/Program Files/Git/regret-ladder/static/img/kuhn_tree.svg" alt="Kuhn poker betting tree" style="max-width:740px">
+    <img src="/regret-ladder/static/img/kuhn_tree.svg" alt="Kuhn poker betting tree" style="max-width:740px">
     <figcaption>The full betting tree after the deal. "p" = pass/check/fold, "b" = bet/call.</figcaption>
   </div>
   <p>
@@ -79,7 +79,7 @@
     probability \(\alpha\), holding the King with probability \(3\alpha\), and never with the Queen.
     The game value is \(-\tfrac{1}{18}\) chips/hand for Player 1. Our CFR+ run recovers a member of
     this family <em>exactly</em>: \(\alpha = 0.2226\), \(P(\text{bet}\,|\,K) = 0.6678 = 3\alpha\)
-    (see <a href="C:/Program Files/Git/regret-ladder/results">Results</a>).
+    (see <a href="/regret-ladder/results">Results</a>).
   </p>
 </div>
 
@@ -210,7 +210,7 @@
   <p>
     CFR traverses the full game tree each iteration, computing at every information set \(I\) the
     counterfactual values \(v_i(\sigma^t, I)\) and \(v_i(\sigma^t_{(I \to a)}, I)\)
-    (see the <a href="C:/Program Files/Git/regret-ladder/regret">Regret section</a>), accumulating regrets, and setting the next strategy
+    (see the <a href="/regret-ladder/regret">Regret section</a>), accumulating regrets, and setting the next strategy
     by regret matching.
     By Theorem 2 (regret decomposition) the overall regret is bounded by the per-information-set sums,
     and Theorem 1 turns vanishing regret into an approximate Nash equilibrium of the
@@ -233,7 +233,7 @@
   </ol>
   <p>
     Empirically CFR+'s <em>current</em> strategy also (nearly) converges — vanilla CFR's never does —
-    which we reproduce in the live-training tab and in <a href="C:/Program Files/Git/regret-ladder/results">Results</a>.
+    which we reproduce in the live-training tab and in <a href="/regret-ladder/results">Results</a>.
   </p>
 
   <h3>Monte Carlo CFR (Lanctot et al. 2009 [2])</h3>
@@ -274,12 +274,12 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
-<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+<script src="/regret-ladder/static/js/common.js?v=1782029260"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/kuhn.js?v=1782024649"></script>
-<script src="C:/Program Files/Git/regret-ladder/static/js/training.js?v=1782024649"></script>
+<script src="/regret-ladder/static/js/kuhn.js?v=1782029260"></script>
+<script src="/regret-ladder/static/js/training.js?v=1782029260"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {

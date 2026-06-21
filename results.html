@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="C:/Program Files/Git/regret-ladder/static/css/style.css?v=1782024649">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029260">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -17,12 +17,12 @@
 <body>
 <nav>
   <div class="brand">Regret <span>Ladder</span></div>
-  <a href="C:/Program Files/Git/regret-ladder/" class="">Home</a>
-  <a href="C:/Program Files/Git/regret-ladder/games" class="">Games</a>
-  <a href="C:/Program Files/Git/regret-ladder/foundations" class="">Foundations</a>
-  <a href="C:/Program Files/Git/regret-ladder/regret" class="">Regret</a>
-  <a href="C:/Program Files/Git/regret-ladder/results" class="active">Results</a>
-  <a href="C:/Program Files/Git/regret-ladder/references" class="">References</a>
+  <a href="/regret-ladder/" class="">Home</a>
+  <a href="/regret-ladder/games" class="">Games</a>
+  <a href="/regret-ladder/foundations" class="">Foundations</a>
+  <a href="/regret-ladder/regret" class="">Regret</a>
+  <a href="/regret-ladder/results" class="active">Results</a>
+  <a href="/regret-ladder/references" class="">References</a>
 </nav>
 <main>
 
@@ -46,11 +46,11 @@
     guarantee is \(O(1/\sqrt{T})\)) — the log–log decay line is straight over four decades.</li>
 </ul>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week02_rps_average_strategy_seed0.png" alt="RPS strategy convergence">
+  <img src="/regret-ladder/figures/week02_rps_average_strategy_seed0.png" alt="RPS strategy convergence">
   <figcaption>Average strategy convergence (seed 0): the early bias decays into the equilibrium.</figcaption>
 </div>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week02_rps_average_regret_seed0.png" alt="RPS regret decay">
+  <img src="/regret-ladder/figures/week02_rps_average_regret_seed0.png" alt="RPS regret decay">
   <figcaption>Average regret \(R_T/T\) decay, log–log (seed 0).</figcaption>
 </div>
 
@@ -61,7 +61,7 @@
   \(O(1/\sqrt{T})\)–to–\(O(1/T)\), reaching <strong>2.3×10⁻³</strong> chips/hand at 10,000 iterations.
 </p>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week03_cfr_convergence.png" alt="CFR convergence vs OpenSpiel">
+  <img src="/regret-ladder/figures/week03_cfr_convergence.png" alt="CFR convergence vs OpenSpiel">
   <figcaption>Our vanilla CFR vs OpenSpiel's reference solver.</figcaption>
 </div>
 
@@ -82,16 +82,16 @@
   entries stay exactly zero while CFR accumulates negative regret indefinitely.
 </p>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week04_exploitability_vs_iterations.png" alt="CFR vs CFR+ exploitability">
+  <img src="/regret-ladder/figures/week04_exploitability_vs_iterations.png" alt="CFR vs CFR+ exploitability">
   <figcaption>Average and current strategy exploitability, CFR vs CFR+, log–log.</figcaption>
 </div>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week04_current_strategy_trace.png" alt="current strategy trace">
+  <img src="/regret-ladder/figures/week04_current_strategy_trace.png" alt="current strategy trace">
   <figcaption>Current-strategy P(bet) at Player 1's opening infosets: CFR+ (solid) locks onto the
   equilibrium; CFR (dotted) oscillates forever.</figcaption>
 </div>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week04_zero_regret_fraction.png" alt="zero regret fraction">
+  <img src="/regret-ladder/figures/week04_zero_regret_fraction.png" alt="zero regret fraction">
   <figcaption>Fraction of cumulative-regret entries exactly zero (Tammelin §3 compressibility).</figcaption>
 </div>
 
@@ -108,7 +108,7 @@
   <tr><td>ES-MCCFR</td><td>50,000</td><td>2.5×10⁻³ (3-seed mean)</td><td>7.3×10⁵</td></tr>
 </table>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week04b_exploitability_vs_nodes.png" alt="MCCFR comparison by nodes touched">
+  <img src="/regret-ladder/figures/week04b_exploitability_vs_nodes.png" alt="MCCFR comparison by nodes touched">
   <figcaption>Paper-style comparison (Lanctot et al. Figure 1): exploitability vs nodes touched.
   Thin lines are individual MCCFR seeds; bold is the mean.</figcaption>
 </div>
@@ -143,11 +143,11 @@
   <tr><td>Current-strategy exploitability</td><td>1.10×10⁰ (oscillates)</td><td><strong>2.06×10⁻³ (decaying)</strong></td></tr>
 </table>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week05_exploitability_vs_iterations.png" alt="Leduc CFR vs CFR+ exploitability">
+  <img src="/regret-ladder/figures/week05_exploitability_vs_iterations.png" alt="Leduc CFR vs CFR+ exploitability">
   <figcaption>Average and current strategy exploitability, CFR vs CFR+, log–log, on Leduc.</figcaption>
 </div>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week05_zero_regret_fraction.png" alt="Leduc zero regret fraction">
+  <img src="/regret-ladder/figures/week05_zero_regret_fraction.png" alt="Leduc zero regret fraction">
   <figcaption>Fraction of cumulative-regret entries exactly zero — the compressibility claim
   reproduces at this scale too.</figcaption>
 </div>
@@ -157,7 +157,7 @@
   game this size, though the gap between sampling and full traversal narrows as the tree grows.
 </p>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week06_exploitability_vs_nodes.png" alt="Leduc 4-way MCCFR comparison by nodes touched">
+  <img src="/regret-ladder/figures/week06_exploitability_vs_nodes.png" alt="Leduc 4-way MCCFR comparison by nodes touched">
   <figcaption>Exploitability vs nodes touched: CFR, CFR+, OS-MCCFR, ES-MCCFR on Leduc.</figcaption>
 </div>
 <p>
@@ -167,7 +167,7 @@
   effectively Nash-equivalent strategy at this budget.
 </p>
 <div class="figure">
-  <img src="C:/Program Files/Git/regret-ladder/figures/week06_leduc_payoff_matrix.png" alt="Leduc 7-agent tournament payoff matrix">
+  <img src="/regret-ladder/figures/week06_leduc_payoff_matrix.png" alt="Leduc 7-agent tournament payoff matrix">
   <figcaption>7-agent round-robin payoff matrix on Leduc Poker.</figcaption>
 </div>
 
@@ -177,8 +177,8 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="C:/Program Files/Git/regret-ladder/static/js/common.js?v=1782024649"></script>
-<script>window.STATIC_MODE = true; window.SITE_BASE = "C:/Program Files/Git/regret-ladder";</script>
+<script src="/regret-ladder/static/js/common.js?v=1782029260"></script>
+<script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
