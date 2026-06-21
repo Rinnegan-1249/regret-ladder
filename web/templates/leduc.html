@@ -44,8 +44,9 @@
   </table>
 </div>
 
-<!-- ============================== PLAY (always a static walkthrough — see note) ============================== -->
+<!-- ============================== PLAY ============================== -->
 <div class="tabpane" id="pane-lplay">
+  {% if static_mode %}
   <h3 style="margin-top:0">Watch a recorded match</h3>
   <div class="controls">
     <div class="field">Recorded match
@@ -57,20 +58,48 @@
   </div>
   <div class="note">
     Leduc's CFR+ bot plays a <strong>frozen average policy trained by this project's solver</strong>
-    (same class used in <code>experiments/exp05_leduc_cfr_variants.py</code>). Unlike Kuhn, this page
-    steps through <strong>whole hands</strong> rather than individual actions — Leduc's two betting
-    rounds and public card make a full interactive per-click experience a much bigger undertaking than
-    is warranted for a demo; recorded hands show the same cards, betting, and outcomes a live match
-    would have, just paced by you instead of the clock.
+    (same class used in <code>experiments/exp05_leduc_cfr_variants.py</code>). This static export steps
+    through <strong>whole hands</strong> rather than individual actions, since it can't hold hidden
+    game state on a server — for real interactive play, click "Action taken" on the
+    <a href="https://regret-ladder-1.onrender.com/leduc" target="_blank" rel="noopener">dynamic version</a>
+    instead.
   </div>
+  {% else %}
+  <h3 style="margin-top:0">Set up a match</h3>
+  <div class="controls">
+    <div class="field">Player 1
+      <select id="l-p1">
+        <option value="human">Human</option>
+        {% for bot in bots %}<option value="{{ bot.id }}">{{ bot.label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">Player 2
+      <select id="l-p2">
+        {% for bot in bots %}<option value="{{ bot.id }}" {{ 'selected' if bot.id == 'cfr_plus' }}>{{ bot.label }}</option>{% endfor %}
+        <option value="human">Human</option>
+      </select>
+    </div>
+    <div class="field">Hands <input type="number" id="l-hands" value="10" min="1" max="10000"></div>
+    <button class="primary" id="l-start">Start match</button>
+  </div>
+  <div class="note">
+    The CFR-family bots play <strong>frozen average policies trained by this project's solvers</strong>
+    (first selection may take a little while the first time). You only ever see your own card; the
+    public card is revealed when it's dealt; the opponent's card is revealed only at showdown — folds
+    end the hand without a reveal. Human matches are capped at 200 hands; bot-vs-bot simulations at
+    10,000.
+  </div>
+  {% endif %}
   <div class="status" id="l-status"></div>
 
   <div id="l-game" style="display:none">
+    {% if static_mode %}
     <div class="controls">
       <button id="l-walk-prev">&larr; Prev hand</button>
       <span id="l-walk-step-label" class="card-label"></span>
       <button id="l-walk-next">Next hand &rarr;</button>
     </div>
+    {% endif %}
     <div class="scoreboard">
       <div><div class="score" id="l-total1">0</div><div class="who" id="l-who1">Player 1</div></div>
       <div><div class="score" id="l-total2">0</div><div class="who" id="l-who2">Player 2</div></div>
@@ -120,7 +149,15 @@
         <div class="card-label" style="text-align:left">Round 2 betting</div>
         <div class="bet-chips" id="l-round2-log"></div>
       </div>
+      <div class="poker-actions" id="l-actions"></div>
     </div>
+
+    {% if not static_mode %}
+    <div id="l-auto-result" class="card" style="display:none">
+      <div class="statgrid" id="l-auto-stats"></div>
+    </div>
+    <div id="l-bankroll-chart" class="chart-sm" style="display:none"></div>
+    {% endif %}
 
     <h3>Hand log</h3>
     <div class="log">

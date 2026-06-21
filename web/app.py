@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from web import kuhn_engine, rps_engine, training_stream
+from web import kuhn_engine, leduc_engine, rps_engine, training_stream
 from web.bots import list_kuhn_bots, list_leduc_bots
 from web.rps_engine import SeatSpec
 
@@ -246,6 +246,56 @@ def kuhn_act(match_id: str, body: KuhnActModel):
 def kuhn_auto(match_id: str):
     try:
         return kuhn_engine.get_match(match_id).auto_run()
+    except KeyError as e:
+        raise HTTPException(404, str(e))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+# ---------- Leduc API (live FastAPI/Render only - not used by the static export) ----------
+
+class LeducNewModel(BaseModel):
+    p1: str
+    p2: str
+    hands: int = 10
+    seed: int = 0
+
+
+class LeducActModel(BaseModel):
+    action: int
+
+
+@app.post("/api/leduc/new")
+def leduc_new(body: LeducNewModel):
+    try:
+        match = leduc_engine.new_match(body.p1, body.p2, hands=body.hands, seed=body.seed)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return match.view()
+
+
+@app.get("/api/leduc/{match_id}/state")
+def leduc_state(match_id: str):
+    try:
+        return leduc_engine.get_match(match_id).view()
+    except KeyError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.post("/api/leduc/{match_id}/act")
+def leduc_act(match_id: str, body: LeducActModel):
+    try:
+        return leduc_engine.get_match(match_id).act(body.action)
+    except KeyError as e:
+        raise HTTPException(404, str(e))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/leduc/{match_id}/auto")
+def leduc_auto(match_id: str):
+    try:
+        return leduc_engine.get_match(match_id).auto_run()
     except KeyError as e:
         raise HTTPException(404, str(e))
     except ValueError as e:

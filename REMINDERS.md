@@ -1,5 +1,21 @@
 # Reminders — things to review manually
 
+## From the 2026-06-21 session (Leduc live play — Render only)
+
+- [ ] **Confirm Render redeploys from `main`.** Pushed `web/leduc_engine.py` (new),
+  `web/app.py` (`/api/leduc/*` endpoints), `web/templates/leduc.html` (live play
+  branch), `web/static/js/leduc.js` (live play JS) to `main` only — **not** to
+  `gh-pages`, per request (the static export still only ever shows the recorded-hand
+  walkthrough for Leduc, since `build_static_site.py` always sets `static_mode=True`).
+  Check Render's dashboard auto-deployed from the latest `main` commit, or trigger a
+  manual deploy, then verify `https://regret-ladder-1.onrender.com/leduc` actually
+  shows "Set up a match" with live play.
+- [ ] **No automated test coverage added for the new Leduc API** (`/api/leduc/*`) -
+  manually smoke-tested via TestClient (human-vs-bot full match, bot-vs-bot auto-run),
+  all looked correct, but consider adding tests mirroring `tests/test_web.py`'s
+  existing Kuhn tests (`test_kuhn_human_vs_bot_hides_opponent_card` etc.) for
+  regression safety.
+
 ## From the 2026-06-21 session (live-site bug fix + visual polish)
 
 - [x] **Push the gh-pages branch and enable GitHub Pages.** DONE — pushed, Pages

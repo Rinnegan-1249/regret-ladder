@@ -162,8 +162,18 @@ Pyodide can't load it) — so Kuhn/Leduc "play" becomes a static walkthrough (pr
 fixed hands, Prev/Next stepper) and all "live" training graphs become precomputed-
 checkpoint replay (`replayCheckpoints`/`startReplayOrLive` in `training.js`/
 `common.js`) feeding the *same* Plotly render functions used for live SSE — visually
-identical, zero retraining risk. Leduc never had a live match engine even in FastAPI
-mode (`leduc.html` has no `static_mode` branch — it's always the walkthrough).
+identical, zero retraining risk.
+
+**Update (2026-06-21):** Leduc now has a real live match engine too -
+`web/leduc_engine.py` (mirrors `kuhn_engine.py`: chance-node dealing, per-round
+betting-action labeling via a `bet_pending` flag, pot parsed from
+`information_state_string` via regex) plus `/api/leduc/{new,act,auto,state}` in
+`web/app.py`. `leduc.html`'s play tab is now a real `{% if static_mode %}` branch like
+Kuhn's: the static export still gets the walkthrough (`static_mode=True` always, since
+`build_static_site.py` sets it globally), but the **live FastAPI/Render app** now lets
+you actually play Leduc against any baseline or CFR-family bot, or watch bot-vs-bot.
+This was deliberately *not* deployed to the GitHub Pages static site (by request) -
+only pushed to `main` for the Render deployment to pick up.
 
 ## Progress log
 
