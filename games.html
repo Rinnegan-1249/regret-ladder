@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029260">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029535">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -34,6 +34,14 @@
   each has a live-training view where you can watch its algorithms learn. The games are ordered by the
   machinery they need: a normal-form game solvable by plain regret matching, then an extensive-form game
   with hidden information that requires the full CFR family.</p>
+</div>
+
+<div class="note">
+  Rock–Paper–Scissors plays a real live match here. Kuhn and Leduc Poker step through
+  recorded hands instead of a live match (this static site can't hold hidden game
+  state on a server) — for real interactive play against the bots and live training
+  graphs, try the <a href="https://regret-ladder-1.onrender.com/" target="_blank" rel="noopener">dynamic version</a>
+  (slower first load — it spins up a live Python server).
 </div>
 
 <div class="gallery">
@@ -88,7 +96,7 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="/regret-ladder/static/js/common.js?v=1782029260"></script>
+<script src="/regret-ladder/static/js/common.js?v=1782029535"></script>
 <script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script>

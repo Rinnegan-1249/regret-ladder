@@ -416,3 +416,45 @@ footer {
   font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.05em;
   padding: 2.2rem; border-top: 1px solid var(--line);
 }
+
+/* ---------------- accessible focus ---------------- */
+/* :focus-visible (not :focus) so mouse clicks stay quiet and only keyboard
+   navigation gets the ring - consistent mint treatment everywhere. */
+a:focus-visible,
+nav a:focus-visible,
+button:focus-visible,
+.tabs button:focus-visible,
+.gallery a.game-card:focus-visible,
+.controls select:focus-visible,
+.controls input:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+button.primary:focus-visible { outline-offset: 2px; }
+
+/* ---------------- reduced motion ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------- small screens ---------------- */
+@media (max-width: 640px) {
+  nav { padding: 0.7rem 1.2rem; gap: 1rem; }
+  main { padding: 1.2rem 1.2rem 3.5rem; }
+  h1 { font-size: 2rem; }
+  .hero-xl .sub { font-size: 0.7rem; letter-spacing: 0.18em; }
+  .scoreboard { gap: 1.4rem; }
+  .duel { gap: 1.1rem; padding: 0.9rem; }
+  .duel .fist { font-size: 2.4rem; }
+  .pcard { width: 72px; height: 102px; }
+  .pcard .rank { font-size: 2.2rem; }
+  .table-row { gap: 0.8rem; }
+  .tabs button { padding: 0.5rem 0.85rem; font-size: 0.72rem; }
+  .controls { gap: 0.8rem; }
+}
