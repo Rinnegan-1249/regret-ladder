@@ -119,20 +119,52 @@ def build_kuhn_training_replay() -> None:
 
 
 def build_leduc_training_replay() -> None:
-    """No retraining - reuse the already-validated, already-committed Week 5
-    CSV (results/tables/week05_leduc_cfr_variants.csv) directly."""
-    csv_path = ROOT / "results" / "tables" / "week05_leduc_cfr_variants.csv"
-    events = [{"type": "start"}]
-    with csv_path.open(newline="", encoding="utf-8") as f:
+    """No retraining - reuse the already-validated, already-committed Week 5/6
+    CSVs directly. CFR/CFR+ come from week05 (10k-iteration run, has the
+    zero-regret-fraction column); OS-MCCFR/ES-MCCFR come from week06's seed-0
+    series (500k/100k-iteration runs) - the two CSVs use unrelated iteration
+    scales, so the four series are replayed positionally (one point per
+    series per animation step), not on a shared iteration axis."""
+    week05 = ROOT / "results" / "tables" / "week05_leduc_cfr_variants.csv"
+    week06 = ROOT / "results" / "tables" / "week06_leduc_mccfr.csv"
+
+    cfr_pts, cfrplus_pts = [], []
+    with week05.open(newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            events.append({
-                "type": "checkpoint",
-                "t": int(row["iteration"]),
-                "cfr_expl": float(row["cfr_avg_expl"]),
-                "cfrplus_expl": float(row["cfrplus_avg_expl"]),
-                "cfr_zero_regret_frac": float(row["cfr_zero_regret_frac"]),
-                "cfrplus_zero_regret_frac": float(row["cfrplus_zero_regret_frac"]),
+            cfr_pts.append({
+                "t": int(row["iteration"]), "expl": float(row["cfr_avg_expl"]),
+                "zero_regret_frac": float(row["cfr_zero_regret_frac"]),
             })
+            cfrplus_pts.append({
+                "t": int(row["iteration"]), "expl": float(row["cfrplus_avg_expl"]),
+                "zero_regret_frac": float(row["cfrplus_zero_regret_frac"]),
+            })
+
+    os_pts, es_pts = [], []
+    with week06.open(newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if row["seed"] != "0":
+                continue
+            pt = {"t": int(row["iteration"]), "expl": float(row["exploitability"])}
+            if row["algorithm"] == "OS-MCCFR":
+                os_pts.append(pt)
+            elif row["algorithm"] == "ES-MCCFR":
+                es_pts.append(pt)
+
+    n_steps = max(len(cfr_pts), len(cfrplus_pts), len(os_pts), len(es_pts))
+
+    def at(series, i):
+        return series[min(i, len(series) - 1)]
+
+    events = [{"type": "start"}]
+    for i in range(n_steps):
+        events.append({
+            "type": "checkpoint",
+            "cfr": at(cfr_pts, i),
+            "cfrplus": at(cfrplus_pts, i),
+            "os_mccfr": at(os_pts, i),
+            "es_mccfr": at(es_pts, i),
+        })
     events.append({"type": "done"})
     _write_json(TRAINING_DIR / "leduc.json", {"events": events})
 
