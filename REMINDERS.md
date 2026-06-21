@@ -1,19 +1,32 @@
 # Reminders — things to review manually
 
-## From the 2026-06-21 session (GitHub Pages export + Leduc page)
+## From the 2026-06-21 session (live-site bug fix + visual polish)
 
-- [ ] **Push the gh-pages branch and enable GitHub Pages.** A `gh-pages` branch was
-  built locally (committed, not pushed) with the static site. To go live:
-  `cd .gh-pages-worktree && git push origin gh-pages` (or rerun
-  `python scripts/deploy_gh_pages.py --base /regret-ladder --push`), then in the GitHub
-  repo settings → Pages, set source = `gh-pages` branch, `/` (root). Confirm the
-  `--base` value matches the real Pages URL subpath (`/regret-ladder` for
-  `rinnegan-1249.github.io/regret-ladder/`; use `""` instead if a custom domain or a
-  user/org root site is set up).
-- [ ] **Eyeball the static site once deployed** — verify nav links, the Kuhn/Leduc
-  walkthroughs, and all three training-replay charts actually render at the live
-  Pages URL (tested locally via headless Chrome + CDP automation, but a real subpath
-  deploy can surface path issues the local `--base ""` test didn't catch).
+- [x] **Push the gh-pages branch and enable GitHub Pages.** DONE — pushed, Pages
+  enabled, live at `https://rinnegan-1249.github.io/regret-ladder/`.
+- [x] **Fix: the first deploy had every link broken.** Running
+  `python scripts/deploy_gh_pages.py --base /regret-ladder` from **Git Bash**
+  silently mangled `--base /regret-ladder` into
+  `--base "C:/Program Files/Git/regret-ladder"` (MSYS auto-converts POSIX-looking
+  absolute-path arguments before handing them to a native `.exe`) — every `{{ base }}`
+  link on the live site, including the stylesheet/JS `<script src>` tags, was a
+  literal Windows path, so the site loaded completely unstyled with every link dead.
+  **Always invoke `deploy_gh_pages.py`/`build_static_site.py` with a `--base /...`
+  argument via the PowerShell tool, never Bash** (or prefix Bash with
+  `MSYS_NO_PATHCONV=1`). Redeployed correctly via PowerShell and verified live
+  (correct `/regret-ladder/...` hrefs, dark theme + canvas animation actually
+  rendering, confirmed via headless-Chrome CDP pixel/computed-style checks).
+- [x] **Visual polish pass** — added site-wide `:focus-visible` states,
+  `prefers-reduced-motion` support (CSS + `hero.js`), and a small-screen breakpoint.
+  Dark theme (`--bg:#0b0f17`)/mint accent (`--mint:#34e3a4`)/canvas hero animation were
+  already intact in source and preserved as-is per the user's request.
+- [x] **Added a "try the dynamic version" note** (home page intro card + top of
+  Games page) linking to `https://regret-ladder-1.onrender.com/`, noting slower
+  cold-start load and that it's the only place with real live training/full
+  interactive play.
+- [ ] **Eyeball the live site once more yourself** — the automated checks confirmed
+  theme/links/animation render correctly, but a human pass over the actual pages is
+  still worth doing before calling this final.
 - [ ] **Rerun `scripts/build_web_static_data.py` + `scripts/deploy_gh_pages.py`** any
   time `poker_ai/` solver behavior, `web/bots.py`'s bot configs, or the committed
   Week 5 CSV change — the static site's data is a frozen snapshot, not auto-synced.

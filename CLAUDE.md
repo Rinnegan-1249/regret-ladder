@@ -167,6 +167,18 @@ mode (`leduc.html` has no `static_mode` branch — it's always the walkthrough).
 
 ## Progress log
 
+- **2026-06-21 (latest #2)** — Fixed the live GitHub Pages deploy: a Git-Bash MSYS
+  path-mangling bug had turned `--base /regret-ladder` into a literal Windows path,
+  breaking every link and asset load on the live site (looked unstyled, every nav/
+  reference link dead). Redeployed correctly via PowerShell — **always use PowerShell,
+  not Bash, for `deploy_gh_pages.py`/`build_static_site.py` with a `--base /...` arg**.
+  Also did a visual polish pass (`:focus-visible` states, `prefers-reduced-motion`
+  support in `style.css` + `hero.js`, a small-screen breakpoint — dark theme/mint
+  accent/canvas animation were already intact and kept as-is) and added a "try the
+  dynamic version" note (home + games pages) pointing at the Render-hosted
+  `web/app.py` deployment for visitors who want real live training/interactive play.
+  Verified live via headless-Chrome CDP (correct hrefs, computed dark-theme colors,
+  canvas actually drawing pixels, zero JS errors).
 - **2026-06-21 (latest)** — Added a static GitHub Pages export of the web demo
   (`scripts/build_web_static_data.py`, `scripts/build_static_site.py`,
   `scripts/deploy_gh_pages.py`) and a new Leduc page (`web/templates/leduc.html`,

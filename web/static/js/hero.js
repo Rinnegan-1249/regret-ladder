@@ -101,9 +101,16 @@
   window.addEventListener("resize", resize);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { cancelAnimationFrame(raf); raf = null; }
-    else if (!raf) loop();
+    else if (!raf && !reduceMotion.matches) loop();
   });
 
+  // Respect prefers-reduced-motion: draw one settled frame instead of an
+  // endless drift/parallax loop.
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   init();
-  loop();
+  if (reduceMotion.matches) {
+    step();
+  } else {
+    loop();
+  }
 })();
