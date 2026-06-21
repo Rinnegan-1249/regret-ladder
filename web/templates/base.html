@@ -30,6 +30,10 @@
 <footer>
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
+  <br>
+  Want to actually play against the bots? This static site only steps through recorded hands —
+  try the <a href="https://regret-ladder-1.onrender.com/" target="_blank" rel="noopener">dynamic version</a>
+  for live interactive play (slower first load — it spins up a live Python server).
 </footer>
 <script src="{{ base }}/static/js/common.js?v={{ v }}"></script>
 {% if static_mode %}<script>window.STATIC_MODE = true; window.SITE_BASE = "{{ base }}";</script>{% endif %}
