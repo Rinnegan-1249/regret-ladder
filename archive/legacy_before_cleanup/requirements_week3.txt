@@ -1,7 +1,0 @@
-open_spiel
-numpy
-pandas
-matplotlib
-scipy
-tqdm
-pytest

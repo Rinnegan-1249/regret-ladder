@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: regret-ladder
-    runtime: python
-    buildCommand: pip install -r requirements-web.txt && pip install .
-    startCommand: uvicorn web.app:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
