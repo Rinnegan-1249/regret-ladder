@@ -234,7 +234,13 @@ function replayCheckpointsFromUrl(staticUrl, onEvent, onDone, onError) {
 
   /* ---------------- Leduc training replay (always precomputed) ---------------- */
   if (el("leduc-train-start")) {
-    let ld = { t: [], cfrExpl: [], cfrplusExpl: [], cfrZero: [], cfrplusZero: [] };
+    // cfr/cfrplus come from a 10k-iteration run (week05 CSV); os_mccfr/es_mccfr
+    // come from a 500k/100k-iteration run (week06 CSV) - unrelated iteration
+    // scales, so each series carries its own x (t) array.
+    let ld = {
+      cfr: { t: [], expl: [], zero: [] }, cfrplus: { t: [], expl: [], zero: [] },
+      os_mccfr: { t: [], expl: [] }, es_mccfr: { t: [], expl: [] },
+    };
     let stream = null;
 
     function leducExplLayout() {
@@ -243,7 +249,7 @@ function replayCheckpointsFromUrl(staticUrl, onEvent, onDone, onError) {
         { type: "log", title: { text: "Exploitability" } });
     }
     function leducZeroRegLayout() {
-      return mergeAxes(darkLayout({ title: { text: "Fraction of regret entries exactly zero" }, height: 320 }),
+      return mergeAxes(darkLayout({ title: { text: "Fraction of regret entries exactly zero (CFR/CFR+)" }, height: 320 }),
         { type: "log", title: { text: "Iteration" } },
         { title: { text: "Fraction" }, range: [0, 1] });
     }
@@ -251,12 +257,14 @@ function replayCheckpointsFromUrl(staticUrl, onEvent, onDone, onError) {
     function renderLeduc() {
       try {
         Plotly.react("leduc-expl-chart", [
-          { x: ld.t.slice(), y: ld.cfrExpl.slice(), mode: "lines", name: "CFR", line: { color: "#f87171", width: 2 } },
-          { x: ld.t.slice(), y: ld.cfrplusExpl.slice(), mode: "lines", name: "CFR+", line: { color: "#34e3a4", width: 2 } },
+          { x: ld.cfr.t.slice(), y: ld.cfr.expl.slice(), mode: "lines", name: "CFR", line: { color: "#f87171", width: 2 } },
+          { x: ld.cfrplus.t.slice(), y: ld.cfrplus.expl.slice(), mode: "lines", name: "CFR+", line: { color: "#34e3a4", width: 2 } },
+          { x: ld.os_mccfr.t.slice(), y: ld.os_mccfr.expl.slice(), mode: "lines", name: "OS-MCCFR", line: { color: "#38bdf8", width: 2 } },
+          { x: ld.es_mccfr.t.slice(), y: ld.es_mccfr.expl.slice(), mode: "lines", name: "ES-MCCFR", line: { color: "#fbbf24", width: 2 } },
         ], leducExplLayout(), PLOT_CONFIG);
         Plotly.react("leduc-zeroreg-chart", [
-          { x: ld.t.slice(), y: ld.cfrZero.slice(), mode: "lines", name: "CFR", line: { color: "#f87171", width: 2 } },
-          { x: ld.t.slice(), y: ld.cfrplusZero.slice(), mode: "lines", name: "CFR+", line: { color: "#34e3a4", width: 2 } },
+          { x: ld.cfr.t.slice(), y: ld.cfr.zero.slice(), mode: "lines", name: "CFR", line: { color: "#f87171", width: 2 } },
+          { x: ld.cfrplus.t.slice(), y: ld.cfrplus.zero.slice(), mode: "lines", name: "CFR+", line: { color: "#34e3a4", width: 2 } },
         ], leducZeroRegLayout(), PLOT_CONFIG);
       } catch (err) {
         setStatus(el("leduc-train-status"), `Chart error: ${err.message}`, true);
@@ -267,21 +275,27 @@ function replayCheckpointsFromUrl(staticUrl, onEvent, onDone, onError) {
       Plotly.react("leduc-expl-chart", [], leducExplLayout(), PLOT_CONFIG);
       Plotly.react("leduc-zeroreg-chart", [], leducZeroRegLayout(), PLOT_CONFIG);
     }
-    window.leducTrainPlaceholders = () => { if (!ld.t.length) placeholders(); };
+    window.leducTrainPlaceholders = () => { if (!ld.cfr.t.length) placeholders(); };
 
     el("leduc-train-start").addEventListener("click", () => {
       if (stream) stream.abort();
-      ld = { t: [], cfrExpl: [], cfrplusExpl: [], cfrZero: [], cfrplusZero: [] };
-      setStatus(el("leduc-train-status"), "Replaying the validated 10,000-iteration training run…");
+      ld = {
+        cfr: { t: [], expl: [], zero: [] }, cfrplus: { t: [], expl: [], zero: [] },
+        os_mccfr: { t: [], expl: [] }, es_mccfr: { t: [], expl: [] },
+      };
+      setStatus(el("leduc-train-status"), "Replaying the validated training runs…");
       stream = replayCheckpointsFromUrl("/static/data/training/leduc.json", (ev) => {
         if (ev.type !== "checkpoint") return;
-        ld.t.push(ev.t);
-        ld.cfrExpl.push(Math.max(ev.cfr_expl, 1e-12));
-        ld.cfrplusExpl.push(Math.max(ev.cfrplus_expl, 1e-12));
-        ld.cfrZero.push(ev.cfr_zero_regret_frac);
-        ld.cfrplusZero.push(ev.cfrplus_zero_regret_frac);
+        ld.cfr.t.push(ev.cfr.t); ld.cfr.expl.push(Math.max(ev.cfr.expl, 1e-12));
+        ld.cfr.zero.push(ev.cfr.zero_regret_frac);
+        ld.cfrplus.t.push(ev.cfrplus.t); ld.cfrplus.expl.push(Math.max(ev.cfrplus.expl, 1e-12));
+        ld.cfrplus.zero.push(ev.cfrplus.zero_regret_frac);
+        ld.os_mccfr.t.push(ev.os_mccfr.t); ld.os_mccfr.expl.push(Math.max(ev.os_mccfr.expl, 1e-12));
+        ld.es_mccfr.t.push(ev.es_mccfr.t); ld.es_mccfr.expl.push(Math.max(ev.es_mccfr.expl, 1e-12));
         renderLeduc();
-        setStatus(el("leduc-train-status"), `Iteration ${ev.t.toLocaleString()} / 10,000`);
+        setStatus(el("leduc-train-status"),
+          `CFR/CFR+ @ ${ev.cfr.t.toLocaleString()} iters, OS-MCCFR @ ${ev.os_mccfr.t.toLocaleString()}, ` +
+          `ES-MCCFR @ ${ev.es_mccfr.t.toLocaleString()}`);
       }, () => {
         renderLeduc();
         setStatus(el("leduc-train-status"), "Done.");

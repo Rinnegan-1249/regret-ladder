@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782029535">
+  <link rel="stylesheet" href="/regret-ladder/static/css/style.css?v=1782032167">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"></noscript>
@@ -159,13 +159,16 @@
 
 <!-- ============================== TRAIN ============================== -->
 <div class="tabpane" id="pane-ltrain">
-  <h3 style="margin-top:0">CFR vs CFR+ at Leduc's scale</h3>
+  <h3 style="margin-top:0">All four solvers at Leduc's scale</h3>
   <p>
     Leduc has too many information sets (936) to chart per-infoset bet probabilities the way the Kuhn
-    page does, so this replays the headline result from
-    <a href="/regret-ladder/results">Results</a> instead: exploitability and the zero-regret-entry fraction,
-    CFR vs CFR+, over the actual validated 10,000-iteration training run
-    (<code>results/tables/week05_leduc_cfr_variants.csv</code>) — animated checkpoint by checkpoint.
+    page does, so this replays the project's actual validated training runs instead — CFR, CFR+,
+    OS-MCCFR, and ES-MCCFR — pulled directly from
+    <code>results/tables/week05_leduc_cfr_variants.csv</code> (CFR/CFR+, 10,000 iterations) and
+    <code>results/tables/week06_leduc_mccfr.csv</code> (OS-MCCFR/ES-MCCFR, 500,000/100,000 iterations,
+    seed 0) — animated checkpoint by checkpoint. CFR and CFR+ finish well before the MCCFR variants do
+    (their curves hold steady once their own run ends) since the three runs use very different
+    iteration budgets.
   </p>
   <div class="controls">
     <button class="primary" id="leduc-train-start">Replay training</button>
@@ -177,8 +180,10 @@
     CFR+'s exploitability win over vanilla CFR <strong>grows</strong> with game size: 255&times; on Kuhn
     &rarr; <strong>2,164&times; on Leduc</strong> at 10,000 iterations — the regret floor matters more as
     more information sets accumulate negative regret that vanilla CFR would otherwise keep oscillating
-    around. See <a href="/regret-ladder/results">Results</a> for the full 4-way comparison against MCCFR by
-    nodes touched.
+    around. The honest MCCFR finding from Kuhn holds here too: despite far larger iteration budgets,
+    OS-MCCFR and ES-MCCFR don't catch full-traversal CFR+'s exploitability — full traversal remains more
+    efficient per node touched at this scale. See <a href="/regret-ladder/results">Results</a> for the same
+    comparison by nodes touched instead of iterations.
   </div>
 </div>
 
@@ -210,12 +215,12 @@
   Regret Ladder — a summer research project on regret minimization in games.
   All bots and live-training graphs are computed by the project's actual validated solvers.
 </footer>
-<script src="/regret-ladder/static/js/common.js?v=1782029535"></script>
+<script src="/regret-ladder/static/js/common.js?v=1782032167"></script>
 <script>window.STATIC_MODE = true; window.SITE_BASE = "/regret-ladder";</script>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="/regret-ladder/static/js/leduc.js?v=1782029535"></script>
-<script src="/regret-ladder/static/js/training.js?v=1782029535"></script>
+<script src="/regret-ladder/static/js/leduc.js?v=1782032167"></script>
+<script src="/regret-ladder/static/js/training.js?v=1782032167"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
